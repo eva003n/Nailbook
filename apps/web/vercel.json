@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://backend-production-463c7.up.railway.app/api/v1/:path*"
+      "destination": "https://wanny-s-nails.onrender.com/api/v1/:path*"
     },
     {
       "source": "/(.*)",
