@@ -1,11 +1,8 @@
 import { createRedisClient } from "@wannys-nails/core";
 import { _config } from "./config.js";
 
+export const redis = createRedisClient("worker", _config);
 
-const connectionName = "conversation-worker";
-
-export const redis = createRedisClient(connectionName, _config);
-
-// Redis connection spesific for the convesation worker
-export const conversationWorkerRedisConn = createRedisClient(connectionName, _config);
-
+// BullMQ Workers take connection options and open their own connections, so
+// every worker in this process shares these options rather than a client each.
+export const bullConnection = redis.options;

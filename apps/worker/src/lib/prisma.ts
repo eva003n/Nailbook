@@ -15,14 +15,13 @@ try {
     },
     "Connected to the database",
   );
-} catch (err: any) {
-  log.info(
+} catch (err: unknown) {
+  log.error(
     {
-      event: "Postgres.connection.success",
-      error: err,
+      event: "Postgres.connection.failed",
+      error: err instanceof Error ? err.message : String(err),
     },
-    "Failed to connect",
-    err.message,
+    "Failed to connect to the database",
   );
 }
 

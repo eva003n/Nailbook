@@ -1,8 +1,8 @@
 /**
- * Reminder worker config — validates only the env vars this worker needs.
+ * Worker config — validates the env vars the background worker process needs.
  *
  * Runs inside Docker, so env vars are injected directly into process.env.
- * No dotenv call here (that's the API's job in development).
+ * In development only, ./.env is loaded via dotenv.
  */
 
 const isDevelopment = (process.env.NODE_ENV || "development") === "development";
@@ -23,12 +23,12 @@ const schema = z.object({
     .default("development"),
   // Redis (required for BullMQ + WhatsApp)
   REDIS_URL: z.string().min(1, "REDIS_URL is required"),
-  // WhatsApp (required for sending reminders)
+  // WhatsApp (required for sending messages)
   WHATSAPP_ACCESS_TOKEN: z.string().min(1, "WHATSAPP_ACCESS_TOKEN is required"),
   WHATSAPP_PHONE_NUMBER_ID: z
     .string()
     .min(1, "WHATSAPP_PHONE_NUMBER_ID is required"),
-  WHATSAPP_API_VERSION: z.string().default(""),
+  WHATSAPP_API_VERSION: z.string().default("v25.0"),
   // Owner's personal WhatsApp number (E.164), used as a fallback channel for
   // human-escalation alerts when no active Web Push subscription exists.
   OWNER_WHATSAPP_PHONE: z.string().default(""),
@@ -43,10 +43,10 @@ const parsed = schema.safeParse(process.env);
 
 if (!parsed.success) {
   console.error(
-    "❌ Reminder worker — invalid environment variables:",
+    "❌ Worker — invalid environment variables:",
     parsed.error.flatten().fieldErrors,
   );
-  throw new Error("Invalid environment variables for reminder worker.");
+  throw new Error("Invalid environment variables for worker.");
 }
 
 export const _config = parsed.data;

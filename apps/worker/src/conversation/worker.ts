@@ -1,28 +1,24 @@
 /**
- * Reminder worker — processes the "reminders" queue.
+ * Conversation worker — processes the "conversations" queue.
  *
  * Handles:
- *  - 24-hour appointment reminders
- *  - 1-hour appointment reminders
+ *  - Inbound WhatsApp messages (run through the booking FSM)
+ *  - Outbound WhatsApp messages enqueued by the FSM
  */
 
 import {
   createWorker,
-  InboundMessage,
   JOB_NAMES,
-  NormalisedEvent,
-  OutboundMessage,
-  registerGracefulShutdown,
+  Queue_Names,
+  type NormalisedEvent,
+  type OutboundMessage,
 } from "@wannys-nails/core";
-
-
-import { Queue_Names } from "@wannys-nails/core";
 import type { Job } from "bullmq";
-import { conversationWorkerRedisConn, log } from "../lib/index.js";
+import { bullConnection, log as rootLog } from "../lib/index.js";
 import { processMessage } from "./processors/workflows/engine.js";
 import { whatsappProcessor } from "./processors/whatsapp.processor.js";
 
-
+const log = rootLog.child({ module: "conversation-worker" });
 
 async function handleWhatsappJob(
   job: Job<NormalisedEvent | OutboundMessage>,
@@ -40,25 +36,24 @@ async function handleWhatsappJob(
       log.warn(
         {
           event: "worker.unknown_job",
-          queue: Queue_Names.NOTIFICATIONS,
+          queue: Queue_Names.CONVERSATIONS,
           jobName: job.name,
         },
         "Unknown conversation whatsapp job name",
       );
   }
 }
+
 // ─── Conversation Worker ─────────────────────────────────────────
 
-
-const worker = createWorker<NormalisedEvent | OutboundMessage>(
-  { queueName: Queue_Names.CONVERSATIONS, workerName: "conversation", concurrency: 1 },
-  async (job: Job<NormalisedEvent | OutboundMessage>) => {
-    await handleWhatsappJob(job as any)
-  },
-  conversationWorkerRedisConn.options,
-  log
-);
-
-// ─── Graceful Shutdown ────────────────────────────────────────
-
-registerGracefulShutdown([worker], log);
+/** Creates the worker and starts it consuming. Shutdown is handled in index.ts. */
+export function createConversationWorker() {
+  return createWorker<NormalisedEvent | OutboundMessage>(
+    { queueName: Queue_Names.CONVERSATIONS, workerName: "conversation", concurrency: 1 },
+    async (job) => {
+      await handleWhatsappJob(job);
+    },
+    bullConnection,
+    log,
+  );
+}

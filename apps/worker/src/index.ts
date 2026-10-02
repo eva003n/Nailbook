@@ -1,16 +1,35 @@
 /**
- * Conversation worker entry point.
+ * Background worker entry point.
  *
- * Starts the  conversation worker and registers graceful shutdown handlers.
- * Run: node dist/workers/conversation/src/index.js
+ * One process runs a BullMQ Worker per queue and registers a single graceful
+ * shutdown that drains all of them.
+ * Run: node dist/index.js
  */
 
-import { log } from "./lib/index.js";
-import "./conversation/worker.js";
+import {
+  conversationQueue,
+  log,
+  notificationQueue,
+  paymentQueue,
+  prisma,
+  redis,
+  rootLogger,
+} from "./lib/index.js";
+import { registerShutdown } from "./lib/shutdown.js";
+import { createConversationWorker } from "./conversation/worker.js";
+
+const workers = [createConversationWorker()];
+
+registerShutdown({
+  workers,
+  queues: [conversationQueue, paymentQueue, notificationQueue],
+  redis,
+  prisma,
+  logger: rootLogger,
+});
 
 log.info({
-    event: "worker.process.started",
-    worker: "conversation",
-    pid: process.pid,
-  },
-);
+  event: "worker.process.started",
+  workers: workers.map((w) => w.name),
+  pid: process.pid,
+});
