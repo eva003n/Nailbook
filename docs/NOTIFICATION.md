@@ -368,7 +368,7 @@ export async function checkWhatsAppRateLimit(jobId: string): Promise<void> {
 - **Delivery status webhooks.** `sent → delivered → read → failed` callbacks land on a webhook endpoint that updates `notifications.status`. Verify the HMAC signature on every webhook call — same pattern as the M-Pesa callback validation already in this codebase. Never trust an unsigned webhook body.
 
 ```typescript
-// apps/workers/notification/src/processors/whatsapp.processor.ts
+// apps/worker/src/notification/processors/whatsapp.processor.ts
 async function sendWhatsAppNotification(job: Job<NotificationJobData>) {
   const { notificationId, endpoint, template } = job.data;
   const templateConfig = TEMPLATES[template];
@@ -1078,7 +1078,7 @@ export async function clearBadge(): Promise<void> {
 ## 8. Server: Push Sender (Fixed)
 
 ```typescript
-// apps/workers/notifications/src/processors/webPush.processor.ts
+// apps/worker/src/notification/processors/push-sender.ts
 import webpush from "web-push";
 import type { Job } from "bullmq";
 
@@ -1218,7 +1218,7 @@ VITE_VAPID_PUBLIC_KEY=     # same value as VAPID_PUBLIC_KEY
 Use resend SDK
 
 ```typescript
-// apps/workers/notification/src/processors/email.processor.ts
+// apps/worker/src/notification/processors/email.processor.ts
 async function sendEmailNotification(job: Job<NotificationJobData>) {
   const { notificationId, endpoint, template } = job.data;
   const payload = await loadRenderedPayload(notificationId);
@@ -1549,7 +1549,7 @@ VAPID_PUBLIC_KEY=           # also exposed to PWA as VITE_VAPID_PUBLIC_KEY
 VAPID_PRIVATE_KEY=
 VAPID_CONTACT_EMAIL=admin@wannysnails.co.ke
 
-# WhatsApp Cloud API (already used by worker-conversation)
+# WhatsApp Cloud API (already used by the conversation worker)
 WHATSAPP_ACCESS_TOKEN=
 WHATSAPP_PHONE_NUMBER_ID=
 WHATSAPP_API_VERSION=v19.0

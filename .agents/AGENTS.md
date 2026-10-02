@@ -10,7 +10,7 @@ React 19 PWA, BullMQ workers, and a shared packages library (pnpm monorepo).
 - Use named exports, not default exports
 
 ## Commands
-Run everything per-app with `pnpm --filter <app> <script>`; `apps/packages/core` is built first and consumed by api + workers.
+Run everything per-app with `pnpm --filter <app> <script>`; `apps/packages/core` is built first and consumed by api + worker.
 
 | Task | Command |
 |---|---|
@@ -18,8 +18,8 @@ Run everything per-app with `pnpm --filter <app> <script>`; `apps/packages/core`
 | API dev | `pnpm dev:api` (or `cd apps/api && pnpm dev`) — port 8000 |
 | PWA dev | `pnpm dev:web` (or `cd apps/web && pnpm dev`) — port 5173 |
 | Lint (api, web) | `pnpm --filter ./apps/api lint` · `pnpm --filter ./apps/web lint` |
-| Typecheck | `pnpm --filter <app> typecheck` (api, web, workers/*); `pnpm --filter ./apps/packages/core typecheck` |
-| Unit / component test | `pnpm --filter <app> test` (api, web, packages/core, workers/*) |
+| Typecheck | `pnpm --filter <app> typecheck` (api, web, worker); `pnpm --filter ./apps/packages/core typecheck` |
+| Unit / component test | `pnpm --filter <app> test` (api, web, packages/core, worker) |
 | Single test file | `pnpm --filter <app> exec vitest run <path/to/file.test.ts>` |
 | Single test by name | `pnpm --filter <app> exec vitest run <path/to/file.test.ts> -t "<test name>"` |
 | Integration tests | run inside `apps/api` `test` — needs real Postgres (`test`) + Redis up |
@@ -46,7 +46,9 @@ apps/web/src/
   store/      # Zustand (auth, ui)
   tests/      # unit | integration | e2e (Playwright)
 
-apps/workers/
+apps/worker/src/           # ONE background process, a BullMQ Worker per queue
+  index.ts       # entry — starts the three workers, one graceful shutdown
+  lib/           # shared config, logger, redis, prisma, queues, shutdown
   conversation/  # WhatsApp FSM + Gemini AI fallback (states/, engine, processors)
   payment/       # M-Pesa STK Push + callback + verification
   notification/  # email / whatsapp / web-push senders

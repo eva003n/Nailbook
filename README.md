@@ -160,14 +160,17 @@ wanny-s-nails/
 │   │   │   ├── hooks/  lib/sse/  store/  types/
 │   │   ├── tests/                  # e2e/, integration/, unit/
 │   │   └── public/                 # icons/, images/, offline.html
-│   └── workers/                    # BullMQ workers
-│       ├── conversation/           # WhatsApp FSM workflow engine + states/ + AI fallback
-│       ├── payment/                # STK push / callback / payment verification
-│       └── notification/           # email, whatsapp, push senders
+│   └── worker/                     # ONE background process running the BullMQ workers
+│       └── src/
+│           ├── index.ts            # entry point + single graceful shutdown
+│           ├── lib/                # shared config, logger, redis, prisma, queues
+│           ├── conversation/       # WhatsApp FSM workflow engine + states/ + AI fallback
+│           ├── payment/            # STK push / callback / payment verification
+│           └── notification/       # email, whatsapp, push senders
 ├── docs/                           # All specification + reference docs
 ├── assets/                         # Shared assets
 ├── .github/workflows/              # CI/CD + Playwright pipelines
-├── vitest.workspace.ts             # Vitest workspace across apps, packages/core, workers
+├── vitest.workspace.ts             # Vitest workspace across apps, packages/core, worker
 ├── pnpm-workspace.yaml
 ├── docker-compose.yml              # + docker-compose.dev.yml
 ├── ecosystem.config.js             # PM2

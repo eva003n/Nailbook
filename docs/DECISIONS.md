@@ -306,6 +306,9 @@ Apple deployments require apple developer account that cost $99/year(12,870ksh)
 - Limited access to ios native features
  
 ## ADR-010: Processes
+
+**Status:** Superseded by [ADR-011](#adr-011-single-background-worker-process)
+
 Each process handles a single responsibility, if it crashes it does not affect the other and can scale independenntly
 
 Four processes
@@ -313,3 +316,52 @@ Four processes
 - Payments process(worker)
 - Conversation process(worker)
 - Notification process(worker)
+
+---
+
+## ADR-011: Single background worker process
+
+**Date:** 2026-10
+**Status:** Accepted (supersedes ADR-010)
+
+### Context
+
+ADR-010 ran the conversation, payment and notification workers as three
+processes so a crash in one could not affect the others and each could scale
+independently. In practice all three are I/O-bound (WhatsApp, Daraja and
+Resend calls, Postgres, Redis), each runs at concurrency 1, and the salon's
+volume is small. Three processes meant three Dockerfiles, three hosted
+services, three sets of connections and memory, for no throughput benefit.
+
+### Decision
+
+Run **three deployables**: `api`, `worker` and `web`.
+
+The `worker` (`apps/worker`, `@wannys-nails/worker`) is one Node process that
+runs one BullMQ `Worker` per queue — `conversations`, `payments`,
+`notifications` — with the same concurrency and limiter settings as before.
+It shares one config, logger, Redis client and Prisma client, and has a single
+graceful shutdown that drains all three workers before closing queues, Redis
+and Prisma (25s cap).
+
+### Consequences
+
+**Positive:**
+- One image, one service and one env file to deploy and monitor
+- One set of Redis and Postgres connections instead of three
+- Config, logger and shutdown live in one place
+
+**Negative:**
+- An uncaught exception, OOM or event-loop stall stops all three queues
+- A missing env var for any domain stops the whole worker from starting
+- The three domains scale together; there is no per-queue scaling
+
+**Mitigations:**
+- Job-level failures are still isolated by BullMQ (retries, dead-letter)
+- Jobs persist in Redis, so a restart resumes where the process stopped
+- Restart policy plus a 30s stop grace period in compose and PM2
+
+**Revisit if:** one domain becomes CPU-bound or needs to scale on its own
+(for example payment volume growing well beyond messaging), or a crash in one
+domain starts causing outages in the others. Splitting back out is mechanical:
+each domain already has its own folder and `create<Domain>Worker()` factory.

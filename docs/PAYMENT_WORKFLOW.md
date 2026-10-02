@@ -190,7 +190,7 @@ Key decisions baked into this schema:
 Daraja access tokens last 1 hour. Don't request a new one per payment — cache it in Redis.
 
 ```typescript
-// apps/workers/payment/src/lib/auth.ts
+// apps/worker/src/lib/mpesa-httpclient.ts
 import { redis } from "./redis";
 
 const TOKEN_CACHE_KEY = "mpesa:access_token";
@@ -232,7 +232,7 @@ export async function getAccessToken(): Promise<string> {
 **Why create the `Payment` row first, synchronously, before the HTTP call:** the alternative — creating it after a successful response — has a window where a charge could be in flight with zero record of it existing. A `PENDING` row that never resolves is recoverable (reconciliation finds it); a charge with no row at all is not.
 
 ```typescript
-// apps/workers/payment/src/processors/stk-push.processor.ts
+// apps/worker/src/payment/processors/stk-push.processor.ts
 export async function initiateStkPush(params: {
   bookingId: string;
   phoneNumber: string; // already normalized to 2547XXXXXXXX
@@ -521,7 +521,7 @@ Callbacks and timeouts handle the vast majority of cases. A nightly reconciliati
 ### Stale Payment Reconciliation (every 10 - 15 minutes)
 
 ```typescript
-// apps/workers/payment/src/processors/payment-verify.processor.ts
+// apps/worker/src/payment/processors/payment-verify.processor.ts
 export async function reconcileStalePayments() {
   const staleThreshold = new Date(Date.now() - 10 * 60 * 1000); // 10 min
 

@@ -130,16 +130,13 @@ CMD ["sh", "-c", "node dist/scripts/migrate.js && node dist/server.js"]
 
 ### Worker Dockerfile
 
-```dockerfile
-ARG NODE_VERSION=22.21.1
-FROM node:${NODE_VERSION}-alpine AS runner
-WORKDIR /app
+One image runs the conversation, payment and notification workers in a single
+process (see ADR-011). The Dockerfile is `apps/worker/Dockerfile`; it builds
+`@wannys-nails/core` and `@wannys-nails/worker` and starts `node dist/index.js`
+from `/app/apps/worker`.
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-
-CMD ["node", "dist/worker.js"]
+```bash
+docker build -f apps/worker/Dockerfile -t wannys-worker .
 ```
 
 ### Production Docker Compose
@@ -170,14 +167,15 @@ services:
 
   worker:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile.worker
+      context: .
+      dockerfile: apps/worker/Dockerfile
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
-      # ... 
+      # WhatsApp, Daraja, Resend and VAPID keys — see apps/worker/.env.example
     restart: unless-stopped
+    stop_grace_period: 30s # worker drains in-flight jobs (25s cap) before exit
     depends_on:
       - api
 ```
