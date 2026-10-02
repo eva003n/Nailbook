@@ -19,7 +19,7 @@ import { registerShutdown } from "./lib/shutdown.js";
 import { createConversationWorker } from "./conversation/worker.js";
 import { createNotificationWorker } from "./notification/worker.js";
 import { createPaymentWorker } from "./payment/worker.js";
-
+import {createServer} from "http"
 const workers = [
   createConversationWorker(),
   createPaymentWorker(),
@@ -34,8 +34,14 @@ registerShutdown({
   logger: rootLogger,
 });
 
-log.info({
-  event: "worker.process.started",
-  workers: workers.map((w) => w.name),
-  pid: process.pid,
-});
+
+// Deployment purposes only: Render only allows web services on free trier not private ones
+createServer((req, res) => {
+  res.end("")
+}).listen(3000, () => {
+  log.info({
+    event: "worker.process.started",
+    workers: workers.map((w) => w.name),
+    pid: process.pid,
+  });
+})
