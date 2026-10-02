@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { handleThankYou } from "./thankYou.js";
 import type { StateHandlerContext } from "../types.js";
 
-vi.mock("../../../lib/index.js", () => ({
+vi.mock("../../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },

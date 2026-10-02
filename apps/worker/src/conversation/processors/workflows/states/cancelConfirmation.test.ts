@@ -4,11 +4,11 @@ import type { StateHandlerContext } from "../types.js";
 const mockCancel = vi.fn();
 const mockOnBookingCancelled = vi.fn();
 
-vi.mock("../../../lib/prisma.js", () => ({
+vi.mock("../../../../lib/prisma.js", () => ({
   prisma: {},
 }));
 
-vi.mock("../../../lib/index.js", () => ({
+vi.mock("../../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },

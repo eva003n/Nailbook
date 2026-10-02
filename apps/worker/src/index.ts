@@ -6,7 +6,7 @@
  */
 
 import { log } from "./lib/index.js";
-import "./worker.js";
+import "./conversation/worker.js";
 
 log.info({
     event: "worker.process.started",

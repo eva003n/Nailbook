@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma.js";
+import { prisma } from "../../../lib/prisma.js";
 
 import type { Prisma } from "@wannys-nails/core";
 import type { DateOption, Slot } from "./types.js";

@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { handleDataCollection } from "./dataCollection.js";
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "../../../../lib/prisma.js";
 import type { StateHandlerContext } from "../types.js";
 
-vi.mock("../../../lib/prisma.js", () => ({
+vi.mock("../../../../lib/prisma.js", () => ({
   prisma: {
     customer: {
       create: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock("../../../lib/prisma.js", () => ({
   },
 }));
 
-vi.mock("../../../lib/index.js", () => ({
+vi.mock("../../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },

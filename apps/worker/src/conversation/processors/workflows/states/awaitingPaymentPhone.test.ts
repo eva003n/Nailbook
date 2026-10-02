@@ -4,13 +4,13 @@ import type { StateHandlerContext } from "../types.js";
 const mockFindUniqueBooking = vi.fn();
 const mockUpdateBooking = vi.fn();
 
-vi.mock("../../../lib/prisma.js", () => ({
+vi.mock("../../../../lib/prisma.js", () => ({
   prisma: {
     booking: { findUnique: mockFindUniqueBooking, update: mockUpdateBooking },
   },
 }));
 
-vi.mock("../../../lib/index.js", () => ({
+vi.mock("../../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },

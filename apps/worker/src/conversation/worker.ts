@@ -18,7 +18,7 @@ import {
 
 import { Queue_Names } from "@wannys-nails/core";
 import type { Job } from "bullmq";
-import { conversationWorkerRedisConn, log } from "./lib/index.js";
+import { conversationWorkerRedisConn, log } from "../lib/index.js";
 import { processMessage } from "./processors/workflows/engine.js";
 import { whatsappProcessor } from "./processors/whatsapp.processor.js";
 

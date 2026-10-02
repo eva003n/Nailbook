@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { handleServiceSelection } from "./serviceSelection.js";
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "../../../../lib/prisma.js";
 import type { StateHandlerContext } from "../types.js";
 
-vi.mock("../../../lib/prisma.js", () => ({
+vi.mock("../../../../lib/prisma.js", () => ({
   prisma: {
     nailService: {
       findMany: vi.fn(),

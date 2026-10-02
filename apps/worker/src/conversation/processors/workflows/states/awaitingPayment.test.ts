@@ -8,14 +8,14 @@ const mockFindUniqueBooking = vi.fn();
 const mockPaymentCreate = vi.fn();
 const mockPaymentUpdate = vi.fn();
 
-vi.mock("../../../lib/prisma.js", () => ({
+vi.mock("../../../../lib/prisma.js", () => ({
   prisma: {
     booking: { findUnique: mockFindUniqueBooking },
     payment: { create: mockPaymentCreate, update: mockPaymentUpdate },
   },
 }));
 
-vi.mock("../../../lib/index.js", () => ({
+vi.mock("../../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },

@@ -5,7 +5,7 @@ const mockPublish = vi.fn();
 const mockCount = vi.fn();
 const mockSendMessage = vi.fn();
 
-vi.mock("../../../lib/index.js", () => ({
+vi.mock("../../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },
@@ -22,7 +22,7 @@ vi.mock("../whatsapp.js", () => ({
 }));
 
 const { handleHumanEscalation } = await import("./humanEscalation.js");
-const { _config: config } = await import("../../../lib/index.js");
+const { _config: config } = await import("../../../../lib/index.js");
 
 function makeContext(overrides?: Partial<StateHandlerContext>): StateHandlerContext {
   return {

@@ -1,9 +1,9 @@
 import type { StateHandlerContext, StateTransitionResult } from "../types.js";
 import { resetInvalidCount, incrementInvalidCount } from "../session.js";
 import { formatDateEAT, formatTime12h } from "../helpers.js";
-import { log as logger, notificationQueue } from "../../../lib/index.js";
+import { log as logger, notificationQueue } from "../../../../lib/index.js";
 
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "../../../../lib/prisma.js";
 import {
   BookingApplicationService,
   PrismaBookingRepository,

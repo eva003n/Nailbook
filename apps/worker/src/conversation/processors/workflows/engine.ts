@@ -11,7 +11,7 @@ import {
   createNewSession,
 } from "./session.js";
 import { sendMessage } from "./whatsapp.js";
-import { log as logger } from "../../lib/index.js";
+import { log as logger } from "../../../lib/index.js";
 
 // State handlers
 import { handleIdle } from "./states/idle.js";
@@ -35,7 +35,7 @@ import {
 import { handleHumanEscalation } from "./states/humanEscalation.js";
 import { maskKenyanPhone, type NormalisedEvent } from "@wannys-nails/core";
 import { getByPhone } from "./helpers.js";
-import { prisma } from "../../lib/prisma.js";
+import { prisma } from "../../../lib/prisma.js";
 
 const log = logger.child({ module: "fsm-engine" });
 

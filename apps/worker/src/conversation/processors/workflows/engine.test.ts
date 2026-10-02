@@ -20,7 +20,7 @@ vi.mock("./whatsapp.js", () => ({
   sendMessage: mockSendMessage,
 }));
 
-vi.mock("../../lib/index.js", () => ({
+vi.mock("../../../lib/index.js", () => ({
   log: {
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },
@@ -32,7 +32,7 @@ vi.mock("./helpers.js", () => ({
 }));
 
 const mockCustomerUpdate = vi.fn();
-vi.mock("../../lib/prisma.js", () => ({
+vi.mock("../../../lib/prisma.js", () => ({
   prisma: { customer: { update: mockCustomerUpdate } },
 }));
 

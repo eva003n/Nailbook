@@ -2,7 +2,7 @@ import type { StateHandlerContext, StateTransitionResult } from "../types.js";
 import { resetInvalidCount, incrementInvalidCount } from "../session.js";
 
 import type { ServiceCategory } from "../types.js";
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "../../../../lib/prisma.js";
 
 /**
  * Human-readable labels for each service category.

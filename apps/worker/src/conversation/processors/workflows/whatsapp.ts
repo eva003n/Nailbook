@@ -1,4 +1,4 @@
-import { log as logger, conversationQueue } from "../../lib/index.js";
+import { log as logger, conversationQueue } from "../../../lib/index.js";
 
 import type { Message, OutboundMessage } from "@wannys-nails/core";
 

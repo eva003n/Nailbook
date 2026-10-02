@@ -1,6 +1,6 @@
 import type { StateHandlerContext, StateTransitionResult } from "../types.js";
 import { resetInvalidCount, incrementInvalidCount } from "../session.js";
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "../../../../lib/prisma.js";
 import { formatTime12h } from "../helpers.js";
 import { getAvailableSlots, getRecommendedSlots } from "@wannys-nails/core";
 import type { TimePeriod } from "@wannys-nails/core";

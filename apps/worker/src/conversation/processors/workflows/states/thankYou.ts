@@ -1,7 +1,7 @@
 import type { StateHandlerContext, StateTransitionResult } from "../types.js";
 import { resetInvalidCount } from "../session.js";
 import { formatDateEAT, formatTime12h } from "../helpers.js";
-import { log as logger } from "../../../lib/index.js";
+import { log as logger } from "../../../../lib/index.js";
 
 const log = logger.child({ module: "fsm-thank-you" });
 
