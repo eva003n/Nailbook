@@ -5,8 +5,8 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "build:dev": "tsc --watch",
+    "build": "tsc -p tsconfig.build.json",
+    "build:dev": "tsc -p tsconfig.build.json --watch",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
