@@ -45,6 +45,12 @@ const schema = z.object({
   DARAJA_STK_QUERY_URL: z.string().min(1, "DARAJA_STK_QUERY_URL is required"),
   DARAJA_CALLBACK_URL: z.string().default(""),
   DARAJA_BASE_URL: z.url("DARAJA_BASE_URL is required"),
+  // Email (Resend) — optional; if not set, email sending will fail gracefully
+  RESEND_API_KEY: z.string().default(""),
+  // Web Push (admin notifications) — optional; push is skipped when unset
+  VAPID_SUBJECT: z.string().default(""),
+  VAPID_PUBLIC_KEY: z.string().default(""),
+  VAPID_PRIVATE_KEY: z.string().default(""),
   LOG_LEVEL: z.string().default("info"),
   LOGTAIL_INGESTION_HOST: z.string().default(""),
   LOGTAIL_SOURCE_TOKEN: z.string().default(""),

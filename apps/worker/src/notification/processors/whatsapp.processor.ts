@@ -1,12 +1,12 @@
 import { type Job } from "bullmq";
 
-import { log as logger, whatsappHttpClient } from "../lib/index.js";
+import { log as logger, whatsappHttpClient } from "../../lib/index.js";
 import {
   HttpClientError,
   OutboundMessage,
   WhatsAppTemplatePayload,
 } from "@wannys-nails/core";
-import { _config as config } from "../lib/config.js";
+import { _config as config } from "../../lib/config.js";
 
 const log = logger.child({ module: "job:whatsapp" });
 

@@ -4,5 +4,4 @@ export default [
   "apps/web",
   "apps/packages/*", // any package with its own vitest.config.ts
   "apps/worker",
-  "apps/workers/*"
 ];

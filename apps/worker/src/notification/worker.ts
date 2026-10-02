@@ -9,7 +9,6 @@
  */
 import {
   createWorker,
-  registerGracefulShutdown,
   Queue_Names,
   type NotificationJobData,
   JOB_NAMES,
@@ -22,10 +21,9 @@ import {
 } from "./processors/email.processor.js";
 import { pushSender } from "./processors/push-sender.js";
 import type { Job } from "bullmq";
-import { log as logger} from "./lib/logger.js";
-import { notificationWorkerRedisConn } from "./lib/redis.js";
+import { bullConnection, log as rootLog } from "../lib/index.js";
 
-const log = logger.child({ module: "worker:notifications" });
+const log = rootLog.child({ module: "worker:notifications" });
 
 // ─── Common Job Handler ───────────────────────────────────────
 
@@ -47,7 +45,7 @@ async function handleNotificationJob(job: Job<NotificationJobData>): Promise<voi
       };
       return await whatsappProcessor({ data: outboundMsg } as Job<OutboundMessage>);
     }
-    
+
     case JOB_NAMES.EMAIL: {
       const emailPayload: EmailJobData = {
         to: job.data.endpoint.address,
@@ -55,11 +53,11 @@ async function handleNotificationJob(job: Job<NotificationJobData>): Promise<voi
         html: JSON.stringify(job.data.payload),
       };
       return await emailProcessor({ data: emailPayload } as Job<EmailJobData>);
-      
+
     }
     case JOB_NAMES.PUSH_NOTIFICATION: {
       return await pushSender(job);
-      
+
     }
     default:
       log.warn(
@@ -69,40 +67,25 @@ async function handleNotificationJob(job: Job<NotificationJobData>): Promise<voi
   }
 }
 
-
-
-
 // ─── Single Notification Worker ──────────────────────────────
 // Handles all notification job types on the notifications queue (WhatsApp,
 // email, push) to avoid worker duplication and racing.
 
-const notificationWorker = createWorker<NotificationJobData>(
-  {
-    queueName: Queue_Names.NOTIFICATIONS,
-    workerName: "notification",
-    concurrency: 1,
-    
-  },
-  async (job: Job<NotificationJobData>) => {
-    await handleNotificationJob(job);
-  },
-   notificationWorkerRedisConn.options,
-   log
-
-);
-
-
-// ─── Graceful Shutdown ────────────────────────────────────────
-
-registerGracefulShutdown([notificationWorker], log);
-
-log.info(
-  {
-    event: "worker.process.started",
-    worker: "notification",
-    pid: process.pid,
-  },
-);
+/** Creates the worker and starts it consuming. Shutdown is handled in index.ts. */
+export function createNotificationWorker() {
+  return createWorker<NotificationJobData>(
+    {
+      queueName: Queue_Names.NOTIFICATIONS,
+      workerName: "notification",
+      concurrency: 1,
+    },
+    async (job: Job<NotificationJobData>) => {
+      await handleNotificationJob(job);
+    },
+    bullConnection,
+    log,
+  );
+}
 
 /**
  * Build WhatsApp text from notification job data.

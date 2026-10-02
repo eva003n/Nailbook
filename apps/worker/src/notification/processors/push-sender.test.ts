@@ -25,11 +25,11 @@ const { childLogger, findManyMock, notificationUpdateMock, subscriptionUpdateMoc
   }),
 );
 
-vi.mock("../lib/index.js", () => ({
+vi.mock("../../lib/index.js", () => ({
   log: { child: () => childLogger },
 }));
 
-vi.mock("../lib/prisma.js", () => ({
+vi.mock("../../lib/prisma.js", () => ({
   prisma: {
     pushSubscription: { findMany: findManyMock, update: subscriptionUpdateMock },
     notification: { update: notificationUpdateMock },

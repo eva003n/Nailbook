@@ -13,11 +13,11 @@
 
 import { type Job } from "bullmq";
 
-import { log as logger } from "../lib/index.js";
-import { _config as config } from "../lib/config.js";
+import { log as logger } from "../../lib/index.js";
+import { _config as config } from "../../lib/config.js";
 
 import type { NotificationJobData } from "@wannys-nails/core";
-import { prisma } from "../lib/prisma.js";
+import { prisma } from "../../lib/prisma.js";
 
 const log = logger.child({ module: "job:push" });
 

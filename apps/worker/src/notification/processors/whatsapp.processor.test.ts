@@ -7,7 +7,7 @@ const { childLogger, postMock } = vi.hoisted(() => ({
   postMock: vi.fn(),
 }));
 
-vi.mock("../lib/index.js", () => ({
+vi.mock("../../lib/index.js", () => ({
   log: { child: () => childLogger },
   whatsappHttpClient: { post: postMock },
 }));

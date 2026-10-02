@@ -25,6 +25,7 @@ export default defineConfig({
       DARAJA_STK_PUSH_URL: "/mpesa/stkpush/v1/processrequest",
       DARAJA_STK_QUERY_URL: "/mpesa/stkpushquery/v1/query",
       DARAJA_BASE_URL: "https://test-fake-daraja.example.com",
+      RESEND_API_KEY: "test-fake-resend-key",
     },
   },
 });
