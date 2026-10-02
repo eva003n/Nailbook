@@ -34,6 +34,17 @@ const schema = z.object({
   OWNER_WHATSAPP_PHONE: z.string().default(""),
   // Database (required for Prisma)
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  // Daraja / M-Pesa (required for STK push + verification)
+  DARAJA_CONSUMER_KEY: z.string().min(1, "DARAJA_CONSUMER_KEY is required"),
+  DARAJA_CONSUMER_SECRET: z
+    .string()
+    .min(1, "DARAJA_CONSUMER_SECRET is required"),
+  DARAJA_SHORTCODE: z.string().min(1, "DARAJA_SHORTCODE is required"),
+  DARAJA_PASSKEY: z.string().min(1, "DARAJA_PASSKEY is required"),
+  DARAJA_STK_PUSH_URL: z.string().min(1, "DARAJA_STK_PUSH_URL is required"),
+  DARAJA_STK_QUERY_URL: z.string().min(1, "DARAJA_STK_QUERY_URL is required"),
+  DARAJA_CALLBACK_URL: z.string().default(""),
+  DARAJA_BASE_URL: z.url("DARAJA_BASE_URL is required"),
   LOG_LEVEL: z.string().default("info"),
   LOGTAIL_INGESTION_HOST: z.string().default(""),
   LOGTAIL_SOURCE_TOKEN: z.string().default(""),

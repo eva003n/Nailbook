@@ -17,8 +17,9 @@ import {
 } from "./lib/index.js";
 import { registerShutdown } from "./lib/shutdown.js";
 import { createConversationWorker } from "./conversation/worker.js";
+import { createPaymentWorker } from "./payment/worker.js";
 
-const workers = [createConversationWorker()];
+const workers = [createConversationWorker(), createPaymentWorker()];
 
 registerShutdown({
   workers,

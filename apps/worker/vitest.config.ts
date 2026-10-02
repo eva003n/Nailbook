@@ -18,6 +18,13 @@ export default defineConfig({
       DATABASE_URL: "postgresql://test:test@test-fake-host:5432/test",
       WHATSAPP_ACCESS_TOKEN: "test-fake-whatsapp-token",
       WHATSAPP_PHONE_NUMBER_ID: "000000000000000",
+      DARAJA_CONSUMER_KEY: "test-fake-daraja-key",
+      DARAJA_CONSUMER_SECRET: "test-fake-daraja-secret",
+      DARAJA_SHORTCODE: "000000",
+      DARAJA_PASSKEY: "test-fake-daraja-passkey",
+      DARAJA_STK_PUSH_URL: "/mpesa/stkpush/v1/processrequest",
+      DARAJA_STK_QUERY_URL: "/mpesa/stkpushquery/v1/query",
+      DARAJA_BASE_URL: "https://test-fake-daraja.example.com",
     },
   },
 });

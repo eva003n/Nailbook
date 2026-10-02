@@ -4,9 +4,9 @@ import {
   prisma,
   type Prisma,
   _config as config,
-} from "../lib/index.js";
-import { mpesaHttpClient } from "../lib/httpclient.js";
-import { notificationQueue } from "../lib/queues.js";
+} from "../../lib/index.js";
+import { mpesaHttpClient } from "../../lib/mpesa-httpclient.js";
+import { notificationQueue } from "../../lib/queues.js";
 import { HttpClientError, JOB_NAMES } from "@wannys-nails/core";
 import { getFailureReason, getTerminalStatus } from "../utils/index.js";
 

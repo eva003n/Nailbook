@@ -25,4 +25,4 @@ try {
   );
 }
 
-export { type BookingModel as Booking } from "@wannys-nails/core";
+export { type BookingModel as Booking, type Prisma } from "@wannys-nails/core";

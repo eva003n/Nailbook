@@ -4,13 +4,13 @@ import {
   prisma,
   _config as config,
   notificationQueue,
-} from "../lib/index.js";
+} from "../../lib/index.js";
 
 import {
   parseStkCallbackBody,
   extractCallbackMetadata,
   isStkCallbackSuccess,
-} from "../lib/schemas.js";
+} from "../schemas.js";
 import { JOB_NAMES } from "@wannys-nails/core";
 import { getFailureReason, getTerminalStatus } from "../utils/index.js";
 
