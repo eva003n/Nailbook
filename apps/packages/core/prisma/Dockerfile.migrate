@@ -12,14 +12,12 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # pnpm needs every workspace member's package.json present to resolve the
 # workspace graph, even though --filter below only installs deps for one
-# of them. Your workspace has 6 members — list them all explicitly so the
+# of them. Your workspace has 4 members — list them all explicitly so the
 # build doesn't depend on glob support varying across BuildKit versions.
 COPY apps/api/package.json ./apps/api/package.json
 COPY apps/packages/core/package.json ./apps/packages/core/package.json
 COPY apps/web/package.json ./apps/web/package.json
-COPY apps/workers/notification/package.json ./apps/workers/notification/package.json
-COPY apps/workers/payment/package.json ./apps/workers/payment/package.json
-COPY apps/workers/conversation/package.json ./apps/workers/conversation/package.json
+COPY apps/worker/package.json ./apps/worker/package.json
 RUN pnpm install --frozen-lockfile --filter ./apps/packages/core...
 
 # Generate the Prisma Client inside the build, rather than relying on

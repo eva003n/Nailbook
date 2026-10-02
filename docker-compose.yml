@@ -119,42 +119,25 @@ services:
     networks:
       - wanny-net
 
-  # ─── Workers (same image, different entry points) ─────────
+  # ─── Worker (conversation + payment + notification queues) ─
 
-  worker-notification:
+  worker:
     build:
       context: .
-      dockerfile: apps/workers/notification/Dockerfile
-    container_name: wannys-worker-notification
+      dockerfile: apps/worker/Dockerfile
+    container_name: wannys-worker
+    restart: unless-stopped
+    # Give in-flight jobs time to drain before SIGKILL (shutdown caps at 25s).
+    stop_grace_period: 30s
     environment:
       NODE_ENV: ${NODE_ENV}
+      APP_NAME: ${APP_NAME:-WannysNails}
       REDIS_URL: ${REDIS_URL}
       DATABASE_URL: ${DATABASE_URL}
       WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
       WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      LOG_LEVEL: ${LOG_LEVEL}
-      LOGTAIL_INGESTION_HOST: ${LOGTAIL_INGESTION_HOST}
-      LOGTAIL_SOURCE_TOKEN: ${LOGTAIL_SOURCE_TOKEN}
-    depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - wanny-net
-
-  worker-payment:
-    build:
-      context: .
-      dockerfile: apps/workers/payment/Dockerfile
-    container_name: wannys-worker-payment
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      REDIS_URL: ${REDIS_URL}
-      DATABASE_URL: ${DATABASE_URL}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v25.0}
+      OWNER_WHATSAPP_PHONE: ${OWNER_WHATSAPP_PHONE:-}
       DARAJA_BASE_URL: ${DARAJA_BASE_URL}
       DARAJA_CONSUMER_KEY: ${DARAJA_CONSUMER_KEY}
       DARAJA_CONSUMER_SECRET: ${DARAJA_CONSUMER_SECRET}
@@ -163,30 +146,10 @@ services:
       DARAJA_STK_PUSH_URL: ${DARAJA_STK_PUSH_URL}
       DARAJA_STK_QUERY_URL: ${DARAJA_STK_QUERY_URL}
       DARAJA_CALLBACK_URL: ${DARAJA_CALLBACK_URL}
-      LOG_LEVEL: ${LOG_LEVEL}
-      LOGTAIL_INGESTION_HOST: ${LOGTAIL_INGESTION_HOST}
-      LOGTAIL_SOURCE_TOKEN: ${LOGTAIL_SOURCE_TOKEN}
-    depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - wanny-net
-
-  worker-conversation:
-    build:
-      context: .
-      dockerfile: apps/workers/conversation/Dockerfile
-    container_name: wannys-worker-conversation
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      REDIS_URL: ${REDIS_URL}
-      DATABASE_URL: ${DATABASE_URL}
-      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
-      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL}
       LOGTAIL_INGESTION_HOST: ${LOGTAIL_INGESTION_HOST}
       LOGTAIL_SOURCE_TOKEN: ${LOGTAIL_SOURCE_TOKEN}

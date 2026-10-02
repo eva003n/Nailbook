@@ -41,11 +41,7 @@ jobs:
             cmd: run typecheck
           - app: packages/core
             cmd: exec tsc --noEmit
-          - app: workers/notification
-            cmd: run typecheck
-          - app: workers/payment
-            cmd: run typecheck
-          - app: workers/conversation
+          - app: worker
             cmd: run typecheck
     steps:
       - uses: actions/checkout@v4
@@ -58,10 +54,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # web/packages/workers here have no DB-backed tests today — anything
+        # web/packages/worker here have no DB-backed tests today — anything
         # touching Postgres/Redis lives under apps/api, covered by test-api.
-        # workers/notification has no "test" script yet, so it's excluded.
-        app: [web, packages/core, workers/conversation, workers/payment]
+        app: [web, packages/core, worker]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-workspace
@@ -138,9 +133,7 @@ jobs:
         image:
           - { name: api, dockerfile: apps/api/Dockerfile }
           - { name: web, dockerfile: apps/web/Dockerfile }
-          - { name: worker-notification, dockerfile: apps/workers/notification/Dockerfile }
-          - { name: worker-payment, dockerfile: apps/workers/payment/Dockerfile }
-          - { name: worker-conversation, dockerfile: apps/workers/conversation/Dockerfile }
+          - { name: worker, dockerfile: apps/worker/Dockerfile }
           - { name: db-migrate, dockerfile: apps/packages/core/prisma/Dockerfile.migrate }
     steps:
       - uses: actions/checkout@v4

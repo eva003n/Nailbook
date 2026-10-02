@@ -93,49 +93,17 @@ services:
     networks:
       - wanny-net
 
-  # ─── Workers (same image, different entry points) ─────────
+  # ─── Worker (conversation + payment + notification queues) ─
 
-  worker-notification:
+  worker:
     build:
       context: .
-      dockerfile: apps/workers/notification/Dockerfile
-    container_name: wannys-worker-notification
+      dockerfile: apps/worker/Dockerfile
+    container_name: wannys-worker
+    restart: unless-stopped
+    stop_grace_period: 30s
     env_file:
-      - ./apps/workers/notification/.env
-    depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - wanny-net
-
-  worker-payment:
-    build:
-      context: .
-      dockerfile: apps/workers/payment/Dockerfile
-    container_name: wannys-worker-payment
-    env_file:
-      - ./apps/workers/payment/.env
-    depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - wanny-net
-
-  worker-conversation:
-    build:
-      context: .
-      dockerfile: apps/workers/conversation/Dockerfile
-    container_name: wannys-worker-conversation
-    env_file:
-      - ./apps/workers/conversation/.env
+      - ./apps/worker/.env
     depends_on:
       db-migrate:
         condition: service_completed_successfully
