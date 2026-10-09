@@ -2,9 +2,13 @@ import { createHmac } from "node:crypto";
 import { string } from "zod";
 
 // prehash(pepper + password) -< KDF
-export function getPrehash(secret: string, password: string) {
+export function getPrehash(secret: string | undefined, password: string) {
+  if (!secret || secret.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(secret)) {
+    throw new Error("PASSWORD_PEPPER must be a non-empty hex string");
+  }
   const pepper = Buffer.from(secret, "hex");
-  return createHmac("sha256", pepper).update(password, "utf-8").digest().toString();
+  // base64 keeps the digest bcrypt-safe (no NUL bytes, 44 chars < 72-byte limit)
+  return createHmac("sha256", pepper).update(password, "utf-8").digest("base64");
 }
 
 /**

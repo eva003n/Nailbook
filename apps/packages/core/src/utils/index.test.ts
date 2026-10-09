@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeKenyanPhone, isValidE164, maskKenyanPhone } from "./index.js";
+import { normalizeKenyanPhone, isValidE164, maskKenyanPhone, getPrehash } from "./index.js";
 
 describe("phone utils (TESTING.md §4.2 — pure functions)", () => {
   describe("normalizeKenyanPhone", () => {
@@ -76,5 +76,25 @@ describe("phone utils (TESTING.md §4.2 — pure functions)", () => {
     it("returns the input for an invalid number", () => {
       expect(maskKenyanPhone("123")).toBe("123");
     });
+  });
+});
+describe("getPrehash", () => {
+  const pepper = "a1b2c3d4e5f60718293a4b5c6d7e8f90";
+
+  it("is deterministic and bcrypt-safe", () => {
+    const h = getPrehash(pepper, "secret");
+    expect(h).toBe(getPrehash(pepper, "secret"));
+    expect(h).toHaveLength(44);
+  });
+
+  it("differs by pepper and password", () => {
+    expect(getPrehash(pepper, "a")).not.toBe(getPrehash("00ff".repeat(8), "a"));
+    expect(getPrehash(pepper, "a")).not.toBe(getPrehash(pepper, "b"));
+  });
+
+  it("rejects missing or non-hex pepper", () => {
+    expect(() => getPrehash(undefined, "a")).toThrow();
+    expect(() => getPrehash("", "a")).toThrow();
+    expect(() => getPrehash("not-hex", "a")).toThrow();
   });
 });

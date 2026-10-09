@@ -8,6 +8,7 @@ import session from "express-session"
 import { errorMiddleware } from "./shared/middleware/error.middleware.js";
 import { requestIdMiddleware } from "./shared/middleware/requestId.middleware.js";
 import { globalRateLimit } from "./shared/middleware/rateLimit.middleware.js";
+import { originCheck } from "./shared/middleware/originCheck.middleware.js";
 
 // Routes
 import { v1Routes } from "./modules/v1/router.js";
@@ -21,11 +22,11 @@ import { groupedBoard } from "./shared/lib/index.js";
  *
  * Kept as a factory (per TESTING.md) so Supertest can run the app
  * entirely in-process without binding to a port. The production entry
- * (`index.ts`) is responsible for creating the HTTP server and listening.
+ * (g`index.ts`) is responsible for creating the HTTP server and listening.
  */
 export function createApp() {
   const app = express();
-  const SESSION_KEY = "session"
+  const SESSION_KEY = "session";
 
   // express app is behind a proxy(trust first proxy hoop)
   app.set("trust proxy", 1);
@@ -36,6 +37,7 @@ export function createApp() {
   app.use(
     cors({
       origin: _config.CORS_ORIGIN.split(","),
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       credentials: true,
     }),
   );
@@ -55,7 +57,7 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true }));
 
   // serve static assets
-  app.use(express.static("public"))
+  app.use(express.static("public"));
   // X-Request-ID middleware (runs on every request)
   app.use(requestIdMiddleware);
 
@@ -78,15 +80,18 @@ export function createApp() {
         path: "/",
         httpOnly: true,
         secure: _config.NODE_ENV === "production",
-        sameSite: "strict",
+        // Production web (Vercel) and API are on different sites, so "strict" would drop the cookie.
+        // CSRF is covered by the CORS allow-list + originCheck middleware.
+        sameSite: _config.NODE_ENV === "production" ? "none" : "strict",
         maxAge: 30 * 60 * 1000, // 30 minutes
       },
     }),
   );
-
+  // check origin header
+  app.use(originCheck);
 
   // Bull mq queues UI
-  app.use("/api/v1/admin/queues", groupedBoard.getRouter())
+  app.use("/api/v1/admin/queues", groupedBoard.getRouter());
 
   // v1 API routes (health, webhooks, and all authenticated routes)
   app.use("/api/v1", v1Routes);

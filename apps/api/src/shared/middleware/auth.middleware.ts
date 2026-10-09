@@ -25,8 +25,8 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction): 
     req.session.destroy((err) => {
       if (err) return next(err);
       next(new UnauthorizedError());
-      return;
     });
+    return;
   }
 
   req.user = {

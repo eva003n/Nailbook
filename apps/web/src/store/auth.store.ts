@@ -108,6 +108,8 @@ export const useAuthStore = create<AuthState>()(
             );
             get().setUser(validated.data);
           } catch (error) {
+            // A login that completed while this check was in flight is authoritative.
+            if (get().status === "authenticated") return;
             const offline = isAxiosError(error) && !error.response;
             const { user } = get();
             if (offline && user) {
