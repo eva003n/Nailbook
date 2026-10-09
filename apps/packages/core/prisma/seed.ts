@@ -39,16 +39,22 @@ const prisma = new PrismaClient({ adapter });
 
 const users = [
   {
-    email: "wanny@wannysnails.com",
-    name: "Wanny",
+    email: "wanny@nailbook.com",
+    name: "owner",
     password: "Admin123!",
     role: "OWNER" as const,
   },
   {
-    email: "guest@wannysnails.com",
+    email: "guest@nailbook.com",
     name: "guest",
     password: "Guest123!",
     role: "OWNER" as const,
+  },
+  {
+    email: "staff@nailbook.com",
+    name: "staff",
+    password: "Staff123!",
+    role: "STAFF" as const,
   },
 ];
 
