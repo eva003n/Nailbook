@@ -12,7 +12,7 @@ import { stkPushProcessor, type StkPushJobData } from "./processors/stk-push.pro
 import { processStkCallback, type StkCallbackJobData } from "./processors/stk-callback.processor.js";
 import { paymentVerifyProcessor, reconcileStalePayments, type PaymentVerifyJobData } from "./processors/payment-verify.processor.js";
 import type { Job } from "bullmq";
-import { bullConnection, log as rootLog } from "../lib/index.js";
+import { bullConnection, QUEUE_KEY_PREFIX, log as rootLog } from "../lib/index.js";
 
 const log = rootLog.child({module: "payment_processor"});
 
@@ -25,7 +25,7 @@ type PaymentJobData = StkPushJobData | StkCallbackJobData | PaymentVerifyJobData
 /** Creates the worker and starts it consuming. Shutdown is handled in index.ts. */
 export function createPaymentWorker() {
   return createWorker<PaymentJobData>(
-    { queueName: Queue_Names.PAYMENTS, workerName: "payment", concurrency: 1, limiter: {max: 5, duration: 60_000 }  },
+    { queueName: Queue_Names.PAYMENTS, workerName: "payment", concurrency: 1, prefix: QUEUE_KEY_PREFIX + Queue_Names.PAYMENTS, limiter: {max: 5, duration: 60_000 }  },
     async (job: Job<PaymentJobData>) => {
       switch (job.name) {
         case JOB_NAMES.STK_PUSH:

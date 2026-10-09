@@ -22,6 +22,8 @@ export interface WorkerOptions {
   queueName: string;
   workerName: string;
   concurrency?: number;
+  /** Must equal the producer Queue's `prefix` (keyPrefix + queueName) */
+  prefix?: string;
   limiter?: {
     max?: number
     duration?: number
@@ -42,6 +44,7 @@ export function createWorker<T = any>(
     },
     {
       connection,
+      ...(opts.prefix ? { prefix: opts.prefix } : {}),
       concurrency: opts.concurrency ?? 1,
       name: opts.workerName,
       limiter: {

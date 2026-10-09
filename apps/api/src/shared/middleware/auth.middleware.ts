@@ -10,17 +10,6 @@ export interface JwtPayload {
   role: string;
 }
 
-/**
- * Extract a JWT from the request.
- *
- * The token is resolved from, in order of priority:
- * 1. A signed HTTP-only cookie (`accessToken`) — preferred for browser clients.
- * 2. The `Authorization: Bearer <token>` header — used by APIs, mobile apps, and
- *    external clients (e.g. EventSource which cannot set custom headers).
- *
- * Controllers and services must never parse cookies or headers directly — this
- * centralised helper is the single source of truth for auth extraction.
- */
 
 const ABSOLUTE_LIFE_TIME = 12 * 60 * 60 * 1000;
 export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {

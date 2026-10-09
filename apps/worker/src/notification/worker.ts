@@ -21,7 +21,7 @@ import {
 } from "./processors/email.processor.js";
 import { pushSender } from "./processors/push-sender.js";
 import type { Job } from "bullmq";
-import { bullConnection, log as rootLog } from "../lib/index.js";
+import { bullConnection, QUEUE_KEY_PREFIX, log as rootLog } from "../lib/index.js";
 
 const log = rootLog.child({ module: "worker:notifications" });
 
@@ -76,6 +76,7 @@ export function createNotificationWorker() {
   return createWorker<NotificationJobData>(
     {
       queueName: Queue_Names.NOTIFICATIONS,
+      prefix: QUEUE_KEY_PREFIX + Queue_Names.NOTIFICATIONS,
       workerName: "notification",
       concurrency: 1,
     },

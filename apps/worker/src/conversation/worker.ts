@@ -14,7 +14,7 @@ import {
   type OutboundMessage,
 } from "@wannys-nails/core";
 import type { Job } from "bullmq";
-import { bullConnection, log as rootLog } from "../lib/index.js";
+import { bullConnection, QUEUE_KEY_PREFIX, log as rootLog } from "../lib/index.js";
 import { processMessage } from "./processors/workflows/engine.js";
 import { whatsappProcessor } from "./processors/whatsapp.processor.js";
 
@@ -49,7 +49,7 @@ async function handleWhatsappJob(
 /** Creates the worker and starts it consuming. Shutdown is handled in index.ts. */
 export function createConversationWorker() {
   return createWorker<NormalisedEvent | OutboundMessage>(
-    { queueName: Queue_Names.CONVERSATIONS, workerName: "conversation", concurrency: 1 },
+    { queueName: Queue_Names.CONVERSATIONS, workerName: "conversation", concurrency: 1, prefix: QUEUE_KEY_PREFIX + Queue_Names.CONVERSATIONS },
     async (job) => {
       await handleWhatsappJob(job);
     },

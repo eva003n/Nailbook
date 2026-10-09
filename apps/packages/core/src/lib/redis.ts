@@ -15,8 +15,8 @@ type Config = {
   REDIS_URL: string | undefined
 }
 
-export function createRedisClient(name: string, config: Config): Redis {
-  const isProduction = config.REDIS_URL?.startsWith("rediss://");
+export function createRedisClient(options: {name: string, config: Config, keyPrefix: string | undefined}): Redis {
+  const isProduction = options.config.REDIS_URL?.startsWith("rediss://");
 
   const redisConfig: RedisOptions = {
     maxRetriesPerRequest: null, // due to queues
@@ -44,13 +44,14 @@ export function createRedisClient(name: string, config: Config): Redis {
         }
       : {}),
 
-    connectionName: name,
+    connectionName: options.name,
+    keyPrefix: options.keyPrefix,
     keepAlive: 30000,
     enableOfflineQueue: true, // queues commands in memory when redis is down(monitor memory usage)
   };
 
-  const url = config.REDIS_URL
-  const appName = config.APP_NAME
+  const url = options.config.REDIS_URL
+  const appName = options.config.APP_NAME
 
 
     if(!url) {
@@ -60,16 +61,18 @@ export function createRedisClient(name: string, config: Config): Redis {
     throw new Error("APP_NAME is required");
   }
 
+  // dev only during hot reload eg nodemon; keyed by name so differently configured clients don't collide
+  const clients = (globalThis.redisClients ??= {});
+
   const client =
-    globalThis.redis ??
+    clients[options.name] ??
     new Redis(url, {
       ...redisConfig,
-      connectionName: `${appName}:${name}`,
+      connectionName: `${appName}-${options.name}`,
     });
 
-  // dev only during hot reload eg nodemon
   if (!isProduction) {
-    globalThis.redis = client;
+    clients[options.name] = client;
   }
 
   return client;

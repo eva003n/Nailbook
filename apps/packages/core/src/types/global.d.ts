@@ -3,5 +3,5 @@ import type {Redis} from "ioredis";
 
 declare global {
     var prisma: PrismaClient | undefined
-    var redis: Redis | undefined
+    var redisClients: Record<string, Redis> | undefined
 }
