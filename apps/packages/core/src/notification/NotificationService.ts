@@ -5,7 +5,7 @@
  * Designed to be used by both the API process and worker processes.
  */
 import type { Queue } from "bullmq";
-import { normalizeKenyanPhone } from "../utils/phone.js";
+import { normalizeKenyanPhone } from "../utils/index.js";
 import {
   NOTIFICATION_TRIGGERS,
   evaluateCondition,
