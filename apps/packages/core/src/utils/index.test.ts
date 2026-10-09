@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeKenyanPhone, isValidE164, maskKenyanPhone } from "./phone.js";
+import { normalizeKenyanPhone, isValidE164, maskKenyanPhone } from "./index.js";
 
 describe("phone utils (TESTING.md §4.2 — pure functions)", () => {
   describe("normalizeKenyanPhone", () => {

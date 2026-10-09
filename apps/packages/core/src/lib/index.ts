@@ -5,6 +5,6 @@ export * from "./redis.js";
 export * from "./prisma.js"
 export * from "./queues/queues.js";
 export * from "./workers/index.js";
-export * from "../utils/phone.js";
+export * from "../utils/index.js";
 export * from "../constants.js";
 export * from "./whatsapp/index.js"

@@ -2,33 +2,33 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import bcrypt from "bcryptjs";
+import {hash} from "bcrypt";
+import {getPrehash } from "../src/utils/index"
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const isDevelopment = (process.env.NODE_ENV || "development") === "development"
+const isDevelopment = (process.env.NODE_ENV || "development") === "development";
 
-if(isDevelopment) {
-  const dotenv = await import("dotenv")
-  dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
+if (isDevelopment) {
+  const dotenv = await import("dotenv");
+  const relativeFilePath = isDevelopment ? "../.env" : "../.env.production";
+  dotenv.config({ path: path.resolve(__dirname, relativeFilePath)});
 }
-
 
 const SALT_ROUNDS = 12;
 let dbOptions: Record<string, unknown> = {};
-if(isDevelopment) {
+if (isDevelopment) {
   dbOptions = {
     connectionString: process.env.DATABASE_URL,
   };
-}else {
+} else {
   dbOptions = {
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
   };
 }
-
 
 const adapter = new PrismaPg(dbOptions);
 const prisma = new PrismaClient({ adapter });
@@ -42,6 +42,12 @@ const users = [
     email: "wanny@wannysnails.com",
     name: "Wanny",
     password: "Admin123!",
+    role: "OWNER" as const,
+  },
+  {
+    email: "guest@wannysnails.com",
+    name: "guest",
+    password: "Guest123!",
     role: "OWNER" as const,
   },
 ];
@@ -146,12 +152,12 @@ const services = [
 
 const businessHours = [
   { dayOfWeek: 0, openTime: "07:00", closeTime: "19:00", isActive: false }, // Sunday - closed
-  { dayOfWeek: 1, openTime: "07:00", closeTime: "19:00", isActive: true },  // Monday
-  { dayOfWeek: 2, openTime: "07:00", closeTime: "19:00", isActive: true },  // Tuesday
-  { dayOfWeek: 3, openTime: "07:00", closeTime: "19:00", isActive: true },  // Wednesday
-  { dayOfWeek: 4, openTime: "07:00", closeTime: "19:00", isActive: true },  // Thursday
-  { dayOfWeek: 5, openTime: "07:00", closeTime: "19:00", isActive: true },  // Friday
-  { dayOfWeek: 6, openTime: "07:00", closeTime: "19:00", isActive: true },  // Saturday
+  { dayOfWeek: 1, openTime: "07:00", closeTime: "19:00", isActive: true }, // Monday
+  { dayOfWeek: 2, openTime: "07:00", closeTime: "19:00", isActive: true }, // Tuesday
+  { dayOfWeek: 3, openTime: "07:00", closeTime: "19:00", isActive: true }, // Wednesday
+  { dayOfWeek: 4, openTime: "07:00", closeTime: "19:00", isActive: true }, // Thursday
+  { dayOfWeek: 5, openTime: "07:00", closeTime: "19:00", isActive: true }, // Friday
+  { dayOfWeek: 6, openTime: "07:00", closeTime: "19:00", isActive: true }, // Saturday
 ];
 
 const defaultNotificationSubscriptions = [
@@ -167,12 +173,15 @@ const defaultNotificationSubscriptions = [
   },
 ];
 
+
 // ============================================
 // Seed functions
 // ============================================
 
 async function seedUsers() {
   console.log("\n--- Users ---");
+
+
   for (const user of users) {
     const existing = await prisma.user.findUnique({
       where: { email: user.email },
@@ -182,7 +191,8 @@ async function seedUsers() {
       continue;
     }
 
-    const passwordHash = await bcrypt.hash(user.password, SALT_ROUNDS);
+    const prehashedPassword = getPrehash(process.env.PASSWORD_PEPPER as string, user.password);
+    const passwordHash = await hash(prehashedPassword, SALT_ROUNDS);
     await prisma.user.create({
       data: {
         email: user.email,
@@ -242,7 +252,9 @@ async function seedBusinessHours() {
         });
         console.log(`  🔄 Updated day ${bh.dayOfWeek} business hours.`);
       } else {
-        console.log(`  ⏭  Day ${bh.dayOfWeek} business hours unchanged, skipping.`);
+        console.log(
+          `  ⏭  Day ${bh.dayOfWeek} business hours unchanged, skipping.`,
+        );
       }
       continue;
     }
@@ -255,8 +267,18 @@ async function seedBusinessHours() {
         isActive: bh.isActive,
       },
     });
-    const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][bh.dayOfWeek];
-    console.log(`  ✅ Created business hours: ${dayName} (${bh.openTime} - ${bh.closeTime})`);
+    const dayName = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ][bh.dayOfWeek];
+    console.log(
+      `  ✅ Created business hours: ${dayName} (${bh.openTime} - ${bh.closeTime})`,
+    );
   }
 }
 
@@ -268,7 +290,9 @@ async function seedNotificationSubscriptions() {
     where: { email: "wanny@wannysnails.com" },
   });
   if (!owner) {
-    console.log("  ⏭  Owner user not found, skipping notification subscriptions.");
+    console.log(
+      "  ⏭  Owner user not found, skipping notification subscriptions.",
+    );
     return;
   }
 
@@ -283,7 +307,9 @@ async function seedNotificationSubscriptions() {
       },
     });
     if (existing) {
-      console.log(`  ⏭  ${sub.channel} subscription for ${sub.endpoint} already exists, skipping.`);
+      console.log(
+        `  ⏭  ${sub.channel} subscription for ${sub.endpoint} already exists, skipping.`,
+      );
       continue;
     }
 
