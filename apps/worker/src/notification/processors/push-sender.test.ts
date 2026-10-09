@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, type MockInstance } from "vitest";
 import type { Job } from "bullmq";
-import type { NotificationJobData } from "@wannys-nails/core";
+import type { NotificationJobData } from "@nailbook/core";
 // Real module — see the `vi.spyOn` note below for why this isn't `vi.mock`-ed.
 import webpushDefault from "web-push";
 import type * as WebPushNS from "web-push";

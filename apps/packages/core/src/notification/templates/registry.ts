@@ -201,7 +201,7 @@ export const TEMPLATES = {
   // ── Email Templates ──────────────────────────────────────────
   payment_receipt_email: {
     channel: "EMAIL",
-    subject: "Your Payment Receipt — Wanny's Nails",
+    subject: "Your Payment Receipt — Nailbook",
     requiresApproval: false,
     vars: ["customerName", "amount", "receiptUrl", "serviceName", "appointmentAt"],
   },

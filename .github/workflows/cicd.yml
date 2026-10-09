@@ -107,7 +107,7 @@ jobs:
       WHATSAPP_BUSINESS_ACCOUNT_ID: test-ba-id
       WHATSAPP_VERIFY_TOKEN: test-verify-token
       META_APP_SECRET: test-meta-secret
-      APP_NAME: Wanny's Nails
+      APP_NAME: Nailbook
       LOG_LEVEL: silent
     steps:
       - uses: actions/checkout@v4

@@ -7,14 +7,14 @@ services:
     build:
       context: .
       dockerfile: apps/packages/core/prisma/Dockerfile.migrate
-    container_name: wannys-db-migrate
+    container_name: nailbook-db-migrate
     environment:
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - wanny-net
+      - nailbook-net
 
   # ─── Database Seed (runs once, after migrations succeed) ──
 
@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: apps/packages/core/prisma/Dockerfile.migrate
-    container_name: wannys-db-seed
+    container_name: nailbook-db-seed
     environment:
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
@@ -35,11 +35,11 @@ services:
     # entrypoint itself needs overriding here, not just the command.
     entrypoint: ["pnpm", "db:seed"]
     networks:
-      - wanny-net
+      - nailbook-net
 
   postgres:
     image: postgres:18-alpine
-    container_name: wannys-postgres
+    container_name: nailbook-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -54,11 +54,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - wanny-net
+      - nailbook-net
 
   redis:
     image: redis:7-alpine
-    container_name: wannys-redis
+    container_name: nailbook-redis
     ports:
       - "6379:6379"
     volumes:
@@ -69,7 +69,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - wanny-net
+      - nailbook-net
 
   # ─── API Server ───────────────────────────────────────────
 
@@ -77,7 +77,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: wannys-api
+    container_name: nailbook-api
     ports:
       - "8000:8000"
     environment:
@@ -117,7 +117,7 @@ services:
         condition: service_healthy
     command: ["node", "dist/index.js"]
     networks:
-      - wanny-net
+      - nailbook-net
 
   # ─── Worker (conversation + payment + notification queues) ─
 
@@ -125,13 +125,13 @@ services:
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
-    container_name: wannys-worker
+    container_name: nailbook-worker
     restart: unless-stopped
     # Give in-flight jobs time to drain before SIGKILL (shutdown caps at 25s).
     stop_grace_period: 30s
     environment:
       NODE_ENV: ${NODE_ENV}
-      APP_NAME: ${APP_NAME:-WannysNails}
+      APP_NAME: ${APP_NAME:-Nailbook}
       REDIS_URL: ${REDIS_URL}
       DATABASE_URL: ${DATABASE_URL}
       WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
@@ -161,7 +161,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - wanny-net
+      - nailbook-net
 
   # ─── Frontend (PWA) ──────────────────────────────────────
 
@@ -169,7 +169,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    container_name: wannys-web
+    container_name: nailbook-web
     environment:
       VITE_API_URL: ${VITE_API_URL}
       VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY}
@@ -179,12 +179,12 @@ services:
     depends_on:
       - api
     networks:
-      - wanny-net
+      - nailbook-net
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  wanny-net:
+  nailbook-net:
     driver: bridge

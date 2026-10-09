@@ -24,10 +24,10 @@ export default defineConfig({
       // configurations for the generated manifest file
       manifest: {
         id: "/",
-        name: "Wanny's Nails",
-        short_name: "Wannys Nails",
+        name: "Nailbook",
+        short_name: "Nailbook",
         description:
-          "Booking management for Nails by Wanny salon — appointments, payments, and customers in one place.\n\nThe app can be installed to the home screen of your mobile device or desktop ",
+          "Booking management for Nailbook salon — appointments, payments, and customers in one place.\n\nThe app can be installed to the home screen of your mobile device or desktop ",
         //display_override: ["window-controls-overlay"], // make the app more native by inserting app content in title bar
         display: "standalone",
         orientation: "portrait",

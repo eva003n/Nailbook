@@ -1,4 +1,4 @@
-# Architecture — Wanny's Nails
+# Architecture — Nailbook
 
 **Version:** 1.1
 
@@ -8,13 +8,13 @@
 
 ```mermaid
 C4Context
-    title System Context for Wanny's Nails
+    title System Context for Nailbook
 
     Person(customer, "Customer", "Kenyan nail salon customer. Books and pays via WhatsApp.")
     Person(owner, "Salon Owner", "Manages appointments and business using PWA.")
     Person(staff, "Salon Staff", "Views schedule and manages daily bookings using PWA.")
 
-    System(wannys, "Wanny's Nails Platform", "Booking management, WhatsApp automation, and M-Pesa payments.")
+    System(wannys, "Nailbook Platform", "Booking management, WhatsApp automation, and M-Pesa payments.")
 
     System_Ext(whatsapp, "WhatsApp Cloud API", "Meta's messaging API. Receives and sends WhatsApp messages.")
     System_Ext(daraja, "Daraja M-Pesa API", "Safaricom's payment API. Processes STK Push payments.")
@@ -36,7 +36,7 @@ C4Context
 
 ```mermaid
 C4Container
-    title Container Diagram — Wanny's Nails
+    title Container Diagram — Nailbook
 
     Person(customer, "Customer", "WhatsApp user")
     Person(owner, "Salon Owner / Staff", "PWA user")
@@ -117,7 +117,7 @@ C4Component
 sequenceDiagram
     actor Customer
     participant WA as WhatsApp Cloud API
-    participant API as Wanny's Nails API
+    participant API as Nailbook API
     participant FSM as WhatsApp FSM
     participant Redis
     participant DB as PostgreSQL
@@ -181,7 +181,7 @@ sequenceDiagram
     actor Owner
     participant PWA as PWA (React)
     participant SSE as SSE Handler
-    participant API as Wanny's Nails API
+    participant API as Nailbook API
     participant DB as PostgreSQL
     participant Queue as BullMQ
     participant WA as WhatsApp Cloud API
@@ -224,7 +224,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant API as Wanny's Nails API
+    participant API as Nailbook API
     participant DB@{"type": "database"} as PostgreSQL
     participant Queue@{"type": "queue" } as BullMQ
     participant Daraja as Daraja M-Pesa
@@ -263,7 +263,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant WA as WhatsApp Cloud API
-    participant API as Wanny's Nails API
+    participant API as Nailbook API
     participant FSM as FSM Engine
     participant Redis
 

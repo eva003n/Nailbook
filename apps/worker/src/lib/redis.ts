@@ -1,4 +1,4 @@
-import { createRedisClient } from "@wannys-nails/core";
+import { createRedisClient } from "@nailbook/core";
 import { _config } from "./config.js";
 
 const CONNECTION_NAME = "worker";

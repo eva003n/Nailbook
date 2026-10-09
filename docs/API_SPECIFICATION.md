@@ -1,4 +1,4 @@
-# API Specification — Wanny's Nails
+# API Specification — Nailbook
 
 **Version:** 1.0.0  
 **Base URL:** `https://api.wannysnails.co.ke/api/v1`  

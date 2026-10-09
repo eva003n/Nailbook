@@ -17,7 +17,7 @@ if (isDevelopment) {
 import { z } from "zod";
 
 const schema = z.object({
-  APP_NAME: z.string().default("WannysNails"),
+  APP_NAME: z.string().default("Nailbook"),
   NODE_ENV: z
     .enum(["development", "staging", "production"])
     .default("development"),

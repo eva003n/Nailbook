@@ -5,7 +5,7 @@ import { logger, subscriber } from "../../../shared/lib/index.js";
 
 const log = logger.child({ module: "events" });
 import { asyncHandler } from "../../../shared/utils/asyncHandler.js";
-import type { PubSubEvent } from "@wannys-nails/core";
+import type { PubSubEvent } from "@nailbook/core";
 
 type SSEClient = {
   id: string;

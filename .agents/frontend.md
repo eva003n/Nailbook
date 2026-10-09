@@ -788,8 +788,8 @@ Every deploy ships a `manifest.webmanifest` with, at minimum:
 
 ```json
 {
-  "name": "Wanny's Nails",
-  "short_name": "Wanny's",
+  "name": "Nailbook",
+  "short_name": "Nailbook",
   "description": "Booking, customer, and payment management.",
   "start_url": "/dashboard",
   "scope": "/",

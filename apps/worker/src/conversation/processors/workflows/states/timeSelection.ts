@@ -2,8 +2,8 @@ import type { StateHandlerContext, StateTransitionResult } from "../types.js";
 import { resetInvalidCount, incrementInvalidCount } from "../session.js";
 import { prisma } from "../../../../lib/prisma.js";
 import { formatTime12h } from "../helpers.js";
-import { getAvailableSlots, getRecommendedSlots } from "@wannys-nails/core";
-import type { TimePeriod } from "@wannys-nails/core";
+import { getAvailableSlots, getRecommendedSlots } from "@nailbook/core";
+import type { TimePeriod } from "@nailbook/core";
 
 /** Max recommended slots to show */
 const MAX_RECOMMENDED_SLOTS = 10;

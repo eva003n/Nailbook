@@ -1,4 +1,4 @@
-// Wanny's Nails - Prisma Schema
+// Nailbook - Prisma Schema
 // Based on DATABASE_DESIGN.md
 
 generator client {

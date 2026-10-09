@@ -7,7 +7,7 @@
 
 import  { Redis, type RedisOptions } from "ioredis";
 // const REDIS_URL = process.env.REDIS_URL!;
-// const APP_NAME = process.env.APP_NAME || "Wanny's Nails";
+// const APP_NAME = process.env.APP_NAME || "Nailbook";
 
 // factory function to generate redis clients per workload
 type Config = {

@@ -126,7 +126,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "wannys-nails-auth",
+      name: "nailbook-auth",
       storage: createJSONStorage(() => localStorage),
       // Only persist non-sensitive data — accessToken stays in memory only
       partialize: (state) => ({

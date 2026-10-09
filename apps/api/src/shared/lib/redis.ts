@@ -1,6 +1,6 @@
 import { _config } from "./config.js";
 import { logger } from "./logger.js";
-import { createRedisClient } from "@wannys-nails/core";
+import { createRedisClient } from "@nailbook/core";
 import {IORedisStore} from "connect-ioredis-store"
 import {RedisStore, type RedisReply} from "rate-limit-redis"
 

@@ -1,5 +1,5 @@
 import { _config } from "./config.js";
-import { Config, createLogger } from "@wannys-nails/core";
+import { Config, createLogger } from "@nailbook/core";
 
 /**
  * One root logger for the whole process — createLogger stands up a pino

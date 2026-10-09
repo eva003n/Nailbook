@@ -1,8 +1,8 @@
 import { log as logger, conversationQueue } from "../../../lib/index.js";
 
-import type { Message, OutboundMessage } from "@wannys-nails/core";
+import type { Message, OutboundMessage } from "@nailbook/core";
 
-import { JOB_NAMES } from "@wannys-nails/core";
+import { JOB_NAMES } from "@nailbook/core";
 
 const log = logger.child({ module: "whatsapp-api" });
 

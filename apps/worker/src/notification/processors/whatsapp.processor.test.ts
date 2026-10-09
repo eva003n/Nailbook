@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Job } from "bullmq";
-import { HttpClientError, type OutboundMessage } from "@wannys-nails/core";
+import { HttpClientError, type OutboundMessage } from "@nailbook/core";
 
 const { childLogger, postMock } = vi.hoisted(() => ({
   childLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },

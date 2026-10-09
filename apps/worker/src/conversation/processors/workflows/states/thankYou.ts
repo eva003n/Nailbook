@@ -34,7 +34,7 @@ export async function handleThankYou(
     : "Please pay at the salon when you arrive.";
 
   const thankYouText = [
-    "Thank you for booking with Nails by Wanny! 🎉💅",
+    "Thank you for booking with Nailbook! 🎉💅",
     "",
     `📋 Reference: ${reference}`,
     `✂️ Service: ${serviceName}`,

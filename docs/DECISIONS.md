@@ -1,4 +1,4 @@
-# Architecture Decision Records — Wanny's Nails
+# Architecture Decision Records — Nailbook
 
 **Format:** Each ADR documents a significant technical decision: context, decision, alternatives considered, and consequences.
 
@@ -337,7 +337,7 @@ services, three sets of connections and memory, for no throughput benefit.
 
 Run **three deployables**: `api`, `worker` and `web`.
 
-The `worker` (`apps/worker`, `@wannys-nails/worker`) is one Node process that
+The `worker` (`apps/worker`, `@nailbook/worker`) is one Node process that
 runs one BullMQ `Worker` per queue — `conversations`, `payments`,
 `notifications` — with the same concurrency and limiter settings as before.
 It shares one config, logger, Redis client and Prisma client, and has a single

@@ -1,4 +1,4 @@
-# Product Requirements Document — Wanny's Nails
+# Product Requirements Document — Nailbook
 
 **Version:** 1.0  
 **Status:** Reviewing  
@@ -8,15 +8,15 @@
 
 ## Executive Summary
 
-Wanny's Nails is a WhatsApp-first appointment booking and payment platform for a nail salon operating in Kenya. Customers book appointments, pay via M-Pesa, and receive reminders entirely through WhatsApp — no app download required. The salon owner manages operations through a progressive web application.
+Nailbook is a mobile-first appointment booking and payment platform for a nail salon operating in Kenya. Customers book appointments, pay via M-Pesa, and receive reminders entirely through WhatsApp — no app download required. The salon owner manages operations through a progressive web application.
 
-The platform addresses the salon's core operational pain: manual appointment tracking via phone calls and WhatsApp messages, high rate of clients not seeing remainder emails, clients having to save the Mpesa paybill or remember it off head 
+The platform addresses the salon's core operational pain: manual appointment tracking via phone calls and WhatsApp messages, high rate of clients not seeing remainder emails and slow checkout process
 
 ---
 
 ## Product Vision
 
-> Enable the nail salon customer to book, and manage their appointment in under 3 minutes — entirely through WhatsApp — while giving the salon owner complete operational visibility from their phone or any other device.
+> Enable the nail salon customer to book, and manage their appointment in under 3 minutes — entirely through the website — while giving the salon owner complete operational visibility from their phone or any other device.
 
 ---
 
@@ -44,15 +44,15 @@ The result is revenue loss from no-shows and an inability to grow the business w
 | G5 | Improve customer retention | Repeat booking rate | ≥ 60% within 90 days |
 
 ---
-g
+
 ## Stakeholders
 
 | Stakeholder | Role | Primary Interface |
 |---|---|---|
 | Salon Owner | Business operator, approves bookings, views reports | PWA |
 | Salon Staff | Views daily schedule, manages customer requests | PWA |
-| Customer | Books, pays, receives reminders | WhatsApp |
-| System Administrator | Manages infrastructure and integrations | Backend / Admin CLI |
+| Customer | Books, pays, receives reminders | Website |
+| System Administrator | Manages infrastructure and integrations | Backend |
 
 ---
 
@@ -290,17 +290,18 @@ g
 
 | ID | Requirement |
 |---|---|
-| FR-BK-01 | System must create a booking with status PENDING when a customer completes the WhatsApp booking flow |
+| FR-BK-01 | System must create a booking with status PENDING when a customer completes the Website booking flow |
 | FR-BK-02 | System must prevent double-booking of the same slot |
 | FR-BK-03 | Owner must be able to approve, reject, reschedule, or cancel any booking from the PWA app |
 | FR-BK-04 | System must release a slot back to availability when a booking is cancelled or rejected |
 | FR-BK-05 | Bookings must have a unique human-readable reference (e.g., WN-2026-00123) |
 | FR-BK-06 | System must support configurable slot duration per service |
 | FR-BK-07 | System must respect business hours in slot generation |
-| FR-BK-08 | System must support blocking slots (e.g., lunch breaks, holidays) |
 | FR-BK-09 | All booking state changes must be recorded in a status history table |
 | FR-BK-10 | Bookings must be soft-deleted, not hard-deleted |
-
+| FR-BK-11 | System must support walk in allocation |
+| FR-BK-12 | System must provide a real time digital calender|
+| FR-BK-13 | System must allow booking based on nail technician availability, service duration and preferred appointment time|
 ### FR-PM: Payment Management
 
 | ID | Requirement |
@@ -313,6 +314,7 @@ g
 | FR-PM-06 | System must support manual payment marking by owner (for in-person cash) |
 | FR-PM-07 | Payment history must be searchable by date, customer, and status |
 | FR-PM-08 | System must retry STK Push if the first attempt fails (up to 2 retries) |
+| FR-PM-09 | System must support split payments(cash + Mobile money) |
 
 ### FR-WA: WhatsApp Automation
 
@@ -335,17 +337,21 @@ g
 | FR-NT-01 | System must send a booking confirmation WhatsApp message immediately after PENDING creation |
 | FR-NT-02 | System must send a confirmation WhatsApp message when a booking is APPROVED |
 | FR-NT-03 | System must send a 24-hour reminder via WhatsApp before each APPROVED booking |
-| FR-NT-04 | System must send a 1-hour reminder via WhatsApp before each APPROVED booking |
 | FR-NT-05 | System must send a cancellation notice via WhatsApp when a booking is cancelled |
 | FR-NT-06 | System must send a rescheduling notice via WhatsApp when an appointment is moved |
 | FR-NT-07 | System must push a notification to the PWA app when a new booking is created |
 | FR-NT-08 | All notification jobs must be queued via BullMQ and retried on failure |
 ---
 
+### FR-IM: Inventory management
+|ID| Requirement |
+| FR-IM-01| System must maintain a Stock count, retail tracking and reoder alerts|
+---
+### FR-NT: Nail technicians scheduling
+|ID| Requirement|
+|FR-NT-01| System must enable managing technicians skills, availability(working hours) and days off|
+---
 ## Non-Functional Requirements
-
-
-
 ### Compliance
 - Kenya Data Protection Act (KDPA) 2019 compliance required
 - WhatsApp Business Policy compliance required
@@ -357,7 +363,7 @@ g
 - **Customer**: A salon client identified by their WhatsApp phone number; has a name and a history of bookings.
 - **Booking (Appointment)**: A scheduled service for a customer at a specific date/time; has a status (e.g., confirmed, rescheduled, canceled, completed), the service or services booked, and a payment status.
 - **Service**: A bookable offering (e.g., manicure, pedicure, gel polish) with a name, price, and duration.
-- **Staff Member**: A salon employee who performs services and has their own availability; automatically assigned to bookings and not customer-selectable.
+- **Nail technician**: A salon employee who performs services and has their own availability; automatically assigned to bookings and not customer-selectable.
 - **Availability/Business Hours**: The salon's operating hours and any blocked-out date/time ranges, used to determine which slots are offered.
 - **Payment**: The price charged, amount and method collected, and payment status associated with a booking.
 - **Notification**: A scheduled outbound message tied to a specific booking
@@ -374,18 +380,5 @@ g
 - **SC-006**: Staff can review a full day's bookings and payment statuses in under 1 minute without manual cross-referencing.
 
 ---
-
-## Future Roadmap
-
-### Phase 2
-- Multi-staff scheduling (assign bookings to specific technicians)
-- Waitlist management
-- Loyalty points system
-- Google Calendar integration for staff
-
-### Phase 3
-- Customer-facing web booking portal
-- Automated upsell messages (e.g., "Your gel nails are due for a fill — book now")
-- Analytics dashboard with revenue forecasting
 
 

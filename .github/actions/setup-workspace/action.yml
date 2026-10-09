@@ -1,5 +1,5 @@
 name: Setup workspace
-description: Install pnpm dependencies and build @wannys-nails/core (consumed by api + workers)
+description: Install pnpm dependencies and build @nailbook/core (consumed by api + workers)
 
 runs:
   using: composite

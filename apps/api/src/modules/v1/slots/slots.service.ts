@@ -1,5 +1,5 @@
-import { getAvailableSlots, getRecommendedSlots } from "@wannys-nails/core";
-import type { TimePeriod } from "@wannys-nails/core";
+import { getAvailableSlots, getRecommendedSlots } from "@nailbook/core";
+import type { TimePeriod } from "@nailbook/core";
 import { prisma } from "../../../shared/lib/index.js";
 
 import { BusinessClosedError } from "../../../shared/types/errors.js";

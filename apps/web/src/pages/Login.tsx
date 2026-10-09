@@ -83,7 +83,7 @@ export default function Login() {
             margin: "0 0 var(--space-8)",
           }}
         >
-          Wanny's Nails
+          Nailbook
         </h1>
         <p
           style={{

@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@wannys-nails/core";
+import type { PrismaClient } from "@nailbook/core";
 
 declare global {
     var prisma: PrismaClient | undefined

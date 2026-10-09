@@ -7,7 +7,7 @@ import {
 } from "../../lib/index.js";
 import { mpesaHttpClient } from "../../lib/mpesa-httpclient.js";
 import { notificationQueue } from "../../lib/queues.js";
-import { HttpClientError, JOB_NAMES } from "@wannys-nails/core";
+import { HttpClientError, JOB_NAMES } from "@nailbook/core";
 import { getFailureReason, getTerminalStatus } from "../utils/index.js";
 
 const log = logger.child({ module: "job:payment-verify" });

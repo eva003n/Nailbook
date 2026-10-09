@@ -21,7 +21,7 @@ COPY --from=deps /app/apps/packages/core/node_modules ./apps/packages/core/node_
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api ./apps/api
 COPY apps/packages/core ./apps/packages/core
-RUN pnpm --filter @wannys-nails/core build
+RUN pnpm --filter @nailbook/core build
 RUN pnpm --filter backend build
 
 FROM node:${NODE_VERSION}-alpine AS runtime

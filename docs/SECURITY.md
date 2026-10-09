@@ -1,4 +1,4 @@
-# Security Specification — Wanny's Nails
+# Security Specification — Nailbook
 
 **Version:** 1.0
 
@@ -237,7 +237,7 @@ The salon owner is the Data Controller. Registration with the Office of the Data
 Consent is captured at first interaction in the WhatsApp flow:
 
 ```
-Welcome to Wanny's Nails! 👋
+Welcome to Nailbook! 👋
 
 By continuing, you agree that we may:
 • Store your name and phone number to manage your bookings

@@ -16,7 +16,7 @@ import { type Job } from "bullmq";
 import { log as logger } from "../../lib/index.js";
 import { _config as config } from "../../lib/config.js";
 
-import type { NotificationJobData } from "@wannys-nails/core";
+import type { NotificationJobData } from "@nailbook/core";
 import { prisma } from "../../lib/prisma.js";
 
 const log = logger.child({ module: "job:push" });
@@ -73,7 +73,7 @@ export async function pushSender(job: Job<NotificationJobData>): Promise<void> {
   const pushPriority = getPushPriority(template);
 
   const pushPayload: PushPayload = {
-    title: "Wanny's Nails",
+    title: "Nailbook",
     body: getPushBody(template, payload),
     icon: "/icons/192.png",
     badge: "/icons/badge-96.png",

@@ -1,8 +1,8 @@
 {
-  "name": "@wannys-nails/core",
+  "name": "@nailbook/core",
   "version": "1.0.0",
   "private": true,
-  "description": "Shared common utilities and runtime helpers for the Wanny's Nails workspac.",
+  "description": "Shared common utilities and runtime helpers for the Nailbook workspac.",
   "main": "dist/index.js",
   "type": "module",
   "types": "dist/index.d.ts",

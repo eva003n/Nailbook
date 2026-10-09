@@ -15,7 +15,7 @@ export default function Sidebar() {
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[--radius-md] bg-primary-light text-primary">
           <Sparkles className="h-5 w-5" aria-hidden="true" />
         </div>
-        <span className="hidden text-md font-bold text-text-primary lg:inline">Wanny's Nails</span>
+        <span className="hidden text-md font-bold text-text-primary lg:inline">Nailbook</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {NAV_ITEMS.map((item) => {

@@ -10,7 +10,7 @@ vi.mock("../../../../lib/index.js", () => ({
     child: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn() }),
   },
   _config: {
-    APP_NAME: "Wanny's Nails",
+    APP_NAME: "Nailbook",
     OWNER_WHATSAPP_PHONE: "",
   },
   redis: { publish: mockPublish },

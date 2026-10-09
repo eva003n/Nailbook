@@ -45,7 +45,7 @@ const mockHandleGreeting = vi.fn();
 const mockBuildMainMenuMessage = vi.fn(() => ({
   type: "interactive_list" as const,
   text: "menu",
-  listTitle: "Nail's by Wanny",
+  listTitle: "Nailbook",
   listButtonText: "Choose",
   listSections: [],
 }));

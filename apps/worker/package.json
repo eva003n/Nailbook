@@ -1,5 +1,5 @@
 {
-  "name": "@wannys-nails/worker",
+  "name": "@nailbook/worker",
   "version": "1.0.0",
   "description": "Background worker — conversation FSM, payments and notifications",
   "type": "module",
@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@wannys-nails/core": "workspace:*",
+    "@nailbook/core": "workspace:*",
     "axios": "^1.17.0",
     "bullmq": "^5.78.0",
     "web-push": "^3.6.7",

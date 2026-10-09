@@ -12,7 +12,7 @@ import {
   PrismaBusinessHoursRepository,
   PrismaUnitOfWork,
   NotificationService,
-} from "@wannys-nails/core";
+} from "@nailbook/core";
 
 const log = logger.child({ module: "fsm-awaiting-payment" });
 

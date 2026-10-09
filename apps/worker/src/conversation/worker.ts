@@ -12,7 +12,7 @@ import {
   Queue_Names,
   type NormalisedEvent,
   type OutboundMessage,
-} from "@wannys-nails/core";
+} from "@nailbook/core";
 import type { Job } from "bullmq";
 import { bullConnection, QUEUE_KEY_PREFIX, log as rootLog } from "../lib/index.js";
 import { processMessage } from "./processors/workflows/engine.js";

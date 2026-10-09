@@ -1,4 +1,4 @@
-import { JOB_NAMES } from "@wannys-nails/core";
+import { JOB_NAMES } from "@nailbook/core";
 import { prisma } from "../../../shared/lib/index.js";
 
 import { paymentQueue } from "../../../shared/lib/index.js";

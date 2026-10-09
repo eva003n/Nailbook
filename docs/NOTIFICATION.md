@@ -1,4 +1,4 @@
-# Notifications System — Wanny's Nails
+# Notifications System — Nailbook
 
 Production-grade reference for the notification domain. Audience: Evan + coding agents working in this monorepo. Treat this as the source of truth for how notifications are modeled, triggered, delivered, and made reliable. If you're an agent implementing a notification-related task, read this fully before writing code.
 
@@ -211,7 +211,7 @@ export const TEMPLATES = {
   },
   payment_receipt_email: {
     channel: 'EMAIL',
-    subject: 'Your Payment Receipt — Wanny\'s Nails',
+    subject: 'Your Payment Receipt — Nailbook',
     requiresApproval: false,
     vars: ['clientName', 'amount', 'receiptUrl'],
   },
@@ -456,8 +456,8 @@ export default defineConfig({
       },
 
       manifest: {
-        name: "Wanny's Nails — Admin",
-        short_name: "Wanny Admin",
+        name: "Nailbook — Admin",
+        short_name: "Nailbook Admin",
         description: "Booking and operations dashboard",
         theme_color: "#1a1a2e",           // match your design tokens
         background_color: "#FAFAFA",
@@ -502,7 +502,7 @@ Vite PWA injects the manifest link automatically, but iOS Safari requires these 
 <head>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Wanny Admin" />
+  <meta name="apple-mobile-web-app-title" content="Nailbook Admin" />
 
   <!-- Apple touch icons — Safari won't use the manifest icons -->
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -541,7 +541,7 @@ declare const self: ServiceWorkerGlobalScope;
 clientsClaim();
 self.skipWaiting();
 
-setCacheNameDetails({ prefix: "wanny-admin" });
+setCacheNameDetails({ prefix: "nailbook-admin" });
 
 // Workbox injects the precache manifest here at build time
 precacheAndRoute(self.__WB_MANIFEST);
@@ -761,7 +761,7 @@ async function storeBadgeCount(count: number) {
 // Minimal IDB helpers — don't import a full IDB library into the SW
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open("wanny-sw", 1);
+    const req = indexedDB.open("nailbook-sw", 1);
     req.onupgradeneeded = () => req.result.createObjectStore("kv");
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -1014,7 +1014,7 @@ export function IOSInstallBanner() {
       <div className="flex items-start gap-3">
         <img src="/icons/apple-touch-icon.png" className="w-12 h-12 rounded-xl" alt="" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">Install Wanny Admin</p>
+          <p className="text-sm font-semibold text-gray-900">Install Nailbook Admin</p>
           <p className="text-xs text-gray-600 mt-0.5">
             Tap <ShareIcon className="inline w-4 h-4" /> then{" "}
             <strong>Add to Home Screen</strong> to enable notifications.

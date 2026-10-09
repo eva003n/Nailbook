@@ -21,8 +21,8 @@ COPY --from=deps /app/apps/worker/node_modules ./apps/worker/node_modules
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/packages/core ./apps/packages/core
 COPY apps/worker ./apps/worker
-RUN pnpm --filter @wannys-nails/core build
-RUN pnpm --filter @wannys-nails/worker build || test -f apps/worker/dist/index.js
+RUN pnpm --filter @nailbook/core build
+RUN pnpm --filter @nailbook/worker build || test -f apps/worker/dist/index.js
 
 FROM node:${NODE_VERSION}-alpine AS runtime
 WORKDIR /app

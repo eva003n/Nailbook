@@ -5,7 +5,7 @@ import { redis } from "../../../shared/lib/index.js";
 import { _config } from "../../../shared/lib/index.js";
 import { UnauthorizedError, AccountLockedError } from "../../../shared/types/errors.js";
 import type { JwtPayload } from "../../../shared/middleware/auth.middleware.js";
-import { getPrehash } from "@wannys-nails/core";
+import { getPrehash } from "@nailbook/core";
 
 interface LoginInput {
   email: string;

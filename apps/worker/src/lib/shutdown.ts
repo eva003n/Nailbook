@@ -9,7 +9,7 @@
  * Kept free of imports from ./index.js so tests can drive it with fakes.
  */
 
-import type { createLogger } from "@wannys-nails/core";
+import type { createLogger } from "@nailbook/core";
 
 type Logger = ReturnType<typeof createLogger>;
 

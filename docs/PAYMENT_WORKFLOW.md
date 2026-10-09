@@ -8,7 +8,7 @@
 
 ## Overview
 
-Payments in Wanny's Nails are initiated via M-Pesa STK Push after a customer confirms their booking in the WhatsApp flow. The customer receives a payment prompt on their phone, enters their M-Pesa PIN, and the result is delivered asynchronously to the backend via a Daraja callback.
+Payments in Nailbook are initiated via M-Pesa STK Push after a customer confirms their booking in the WhatsApp flow. The customer receives a payment prompt on their phone, enters their M-Pesa PIN, and the result is delivered asynchronously to the backend via a Daraja callback.
 
 All payment initiation is handled asynchronously via BullMQ for async/retry-safe processing, and an admin PWA for visibility and reconciliation.
 
@@ -71,7 +71,7 @@ stateDiagram-v2
 sequenceDiagram
     participant Customer as Customer (Phone)
     participant Bot as WhatsApp Bot
-    participant API as WannyNail API
+    participant API as Nailbook API
     participant Queue as BullMQ
     participant DB as PostgreSQL
     participant Daraja as Daraja M-Pesa
@@ -273,7 +273,7 @@ export async function initiateStkPush(params: {
           PartyB: process.env.DARAJA_SHORTCODE,
           PhoneNumber: phoneNumber,
           CallBackURL: process.env.DARAJA_CALLBACK_URL,
-          AccountReference: `WANNY-${bookingId.slice(-8).toUpperCase()}`,
+          AccountReference: `NAILBOOK-${bookingId.slice(-8).toUpperCase()}`,
           TransactionDesc: "Nail appointment booking",
         }),
       },

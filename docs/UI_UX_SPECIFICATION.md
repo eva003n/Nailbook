@@ -1,4 +1,4 @@
-# UI/UX Specification — Wanny's Nails PWA
+# UI/UX Specification — Nailbook PWA
 
 **Version:** 1.1  
 **Platform:** React / Vite / vite-plugin-pwa — runs in any browser, installable on iOS/Android  
@@ -24,8 +24,8 @@
 
 ```
 manifest.json
-  name:             "Wanny's Nails"
-  short_name:       "WannyNails"
+  name:             "Nailbook"
+  short_name:       "Nailbook"
   display:          "standalone"          ← hides browser chrome when installed
   orientation:      "portrait"
   theme_color:      "#C084A8"

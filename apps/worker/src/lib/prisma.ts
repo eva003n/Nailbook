@@ -1,4 +1,4 @@
-import { createPrismaClient} from "@wannys-nails/core";
+import { createPrismaClient} from "@nailbook/core";
 import { _config } from "./config.js";
 import { log } from "./logger.js";
 
@@ -25,4 +25,4 @@ try {
   );
 }
 
-export { type BookingModel as Booking, type Prisma } from "@wannys-nails/core";
+export { type BookingModel as Booking, type Prisma } from "@nailbook/core";
