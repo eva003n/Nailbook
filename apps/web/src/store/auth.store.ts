@@ -7,7 +7,7 @@ import type { User } from "@/lib/schemas";
 
 interface AuthState {
   user: User | null;
-  accessToken: string | null;
+//  accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   /* `true` once Zustand persist has finished rehydrating from localStorage */
@@ -32,11 +32,11 @@ export const useAuthStore = create<AuthState>()(
       hydrated: false,
      initialized:false,
 
-      setAuth: (user, accessToken) =>
-        set({ user, accessToken, isAuthenticated: true }),
+      setAuth: (user) =>
+        set({ user,  isAuthenticated: true }),
 
       clearAuth: () =>
-        set({ user: null, accessToken: null, isAuthenticated: false }),
+        set({ user: null, isAuthenticated: false }),
 
       login: async (email: string, password: string) => {
         set({ isLoading: true });
@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
           const { data } = response.data;
           const validated = validateOrThrow(AuthResponseSchema, data, "login");
           set({
-            accessToken: validated.accessToken,
+            // accessToken: validated.accessToken,
             user: validated.user,
             isAuthenticated: true,
             hydrated: true,
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // Ignore errors — proceed with clearing client state
         } finally {
-          set({ accessToken: null, user: null, isAuthenticated: false });
+          set({user: null, isAuthenticated: false });
           set({ isLoading: false });
 
           // httpOnly cookie is cleared by the API

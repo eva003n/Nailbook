@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/store/auth.store";
 
 export const api = axios.create({
@@ -9,40 +9,25 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach access token from Zustand on every request
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
-// Silent refresh on 401
 api.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    const original = error.config;
-    const unallowedRetryUrls = ["/auth/login"];
+  async (error: AxiosError) => {
+    const original = error.config as RetriableConfig | undefined;
+    // Login failures and the startup session check (/auth/me) handle their own 401s.
+    const skipRedirectUrls = ["/auth/login", "/auth/me"];
+
     if (
-     unallowedRetryUrls.includes(original.url)
+      error.response?.status === 401 &&
+      original &&
+      !original._retry &&
+      !skipRedirectUrls.includes(original.url ?? "") &&
+      window.location.pathname !== "/login"
     ) {
-      return Promise.reject(error);
-    }
-    
-    if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
-      try {
-        const { data } = await api.post("/auth/refresh");
-        useAuthStore.getState().setAuth(
-          useAuthStore.getState().user!,
-          data.data.accessToken,
-        );
-        // token based auth
-        original.headers.Authorization = `Bearer ${data.data.accessToken}`;
-        return api(original);
-      } catch {
-        useAuthStore.getState().clearAuth();
-        window.location.href = "/login";
-      }
+      useAuthStore.getState().clearAuth();
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   },

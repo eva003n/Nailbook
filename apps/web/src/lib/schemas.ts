@@ -156,7 +156,6 @@ export const ServiceSchema = z.object({
 });
 
 export const AuthResponseSchema = z.object({
-  accessToken: z.string(),
   user: UserSchema,
 });
 

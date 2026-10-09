@@ -10,7 +10,7 @@ export function connect(
   eventSource = new EventSource(
     `${import.meta.env.VITE_API_URL}/events`,
     {
-      withCredentials: true, // send with auth token in cookie
+      withCredentials: true, // send with auth cookie
     },
   );
 
