@@ -28,6 +28,13 @@ await prisma.$transaction([
 - **Validate env at startup.** `shared/config.ts` uses a Zod `ConfigSchema`. The process exits if any required secret is missing.
 - **Idempotent callbacks.** Daraja and WhatsApp webhook handlers check for duplicate processing before acting (see [domain.md](./domain.md) for specifics).
 
+## Redis key naming
+
+Format: `<APP_NAME>:<process>:<store>:<key>` — e.g. `Nailbook:api:session:<sid>`, `Nailbook:api:ratelimit:<limiter>:<ip>`, `Nailbook:worker:session:<phone>`.
+
+- `<APP_NAME>:<process>:` (api | worker) is applied **once**, by the ioredis `keyPrefix` set in each process's `lib/redis.ts` (with a trailing colon). Never repeat it when building keys or setting a store's `prefix` — use only `<store>:` (e.g. `session:`, `ratelimit:<name>:`).
+- **BullMQ is the exception:** it rejects ioredis `keyPrefix`. Queues and workers use the unprefixed `queueRedis` / `bullConnection` and namespace through BullMQ's `prefix` option: `<APP_NAME>:bull:<queueName>`. Producer (`createQueues`) and consumer (`createWorker({ prefix })`) must use the identical prefix, otherwise jobs are never consumed.
+
 ## Error handling
 
 Throw typed `AppError` subclasses — never generic `Error`:

@@ -293,3 +293,5 @@ sequenceDiagram
     Note over Redis: After 30 min inactivity, key expires automatically
     Note over API: On expiry: next message starts fresh IDLE session
 ```
+
+> **Redis key format:** `<APP_NAME>:<process>:<store>:<key>`, e.g. `Nailbook:worker:session:254712345678`. The `<APP_NAME>:<process>:` prefix is added automatically by each process's Redis client; the keys shown in the diagram above are the logical `<store>:<key>` part. BullMQ queues use `<APP_NAME>:bull:<queueName>` instead. See `.agents/backend.md`.
