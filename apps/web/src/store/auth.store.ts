@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import api from "@/lib/api";
@@ -5,38 +6,41 @@ import { validateOrThrow } from "@/lib/guards";
 import { AuthResponseSchema, MeResponseSchema } from "@/lib/schemas";
 import type { User } from "@/lib/schemas";
 
+/**
+ * `unknown` until the server has confirmed (or denied) the session cookie.
+ * The `sid` cookie is httpOnly, so the client can only learn its validity via `/auth/me`.
+ */
+export type AuthStatus = "unknown" | "authenticated" | "unauthenticated";
+
 interface AuthState {
   user: User | null;
-//  accessToken: string | null;
+  status: AuthStatus;
   isAuthenticated: boolean;
   isLoading: boolean;
-  /* `true` once Zustand persist has finished rehydrating from localStorage */
-  hydrated: boolean;
-  initialized: boolean;
- setAuth: (user: User, token: string) => void;
+  setUser: (user: User) => void;
   clearAuth: () => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
-  /** Called once on app mount to re-validate the persisted session via /auth/me */
+  /** Called once on app mount to validate the session cookie via /auth/me */
   initialize: () => Promise<void>;
 }
 
+let initializing: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
-      accessToken: null,
+      status: "unknown",
       isAuthenticated: false,
       isLoading: false,
-      hydrated: false,
-     initialized:false,
 
-      setAuth: (user) =>
-        set({ user,  isAuthenticated: true }),
+      setUser: (user) =>
+        set({ user, status: "authenticated", isAuthenticated: true }),
 
       clearAuth: () =>
-        set({ user: null, isAuthenticated: false }),
+        set({ user: null, status: "unauthenticated", isAuthenticated: false }),
 
       login: async (email: string, password: string) => {
         set({ isLoading: true });
@@ -44,29 +48,23 @@ export const useAuthStore = create<AuthState>()(
           const response = await api.post("/auth/login", { email, password });
           const { data } = response.data;
           const validated = validateOrThrow(AuthResponseSchema, data, "login");
-          set({
-            // accessToken: validated.accessToken,
-            user: validated.user,
-            isAuthenticated: true,
-            hydrated: true,
-          });
-          // Note: refreshToken is set as httpOnly cookie by the API
+          // The API sets the httpOnly `sid` session cookie on this response.
+          get().setUser(validated.user);
         } finally {
           set({ isLoading: false });
         }
       },
 
       logout: async () => {
-          set({ isLoading: true });
+        set({ isLoading: true });
         try {
           await api.delete("/auth/logout");
         } catch {
           // Ignore errors — proceed with clearing client state
         } finally {
-          set({user: null, isAuthenticated: false });
+          // The server destroys the session; clear local state regardless.
+          get().clearAuth();
           set({ isLoading: false });
-
-          // httpOnly cookie is cleared by the API
         }
       },
 
@@ -79,62 +77,57 @@ export const useAuthStore = create<AuthState>()(
             response.data,
             "fetchMe",
           );
-          set({ user: validated.data });
+          get().setUser(validated.data);
         } catch {
-          set({ user: null });
+          get().clearAuth();
         } finally {
           set({ isLoading: false });
         }
       },
 
       /**
-       * Re-validate the persisted session on app load.
+       * Validate the session cookie on app load.
        *
-       * After Zustand persist rehydrates `user` + `isAuthenticated` from
-       * localStorage we still need a fresh access token (kept in memory only).
+       *  - 200: refresh `user` from the server.
+       *  - 401 / invalid response: clear local state.
+       *  - No response (offline PWA): trust the persisted `user` hint, if any,
+       *    so the app stays usable; the next online request will re-validate.
        *
-       * Flow:
-       *  1. `GET /auth/me` → 401 (no access token in memory)
-       *  2. Axios interceptor catches 401 → `POST /auth/refresh` (httpOnly cookie)
-       *  3. Interceptor stores new accessToken + calls `setAuth(user, token)`
-       *  4. Interceptor retries the original `GET /auth/me`
-       *  5. We update `user` with the fresh server data
-       *
-       * If the refresh cookie is expired the interceptor redirects to /login.
+       * Concurrent calls share one request.
        */
-      initialize: async () => {
+      initialize: () => {
+        if (initializing) return initializing;
         set({ isLoading: true });
-        try {
-          const response = await api.get("/auth/me");
-          const validated = validateOrThrow(
-            MeResponseSchema,
-            response.data,
-            "initialize",
-          );
-
-          set({ user: validated.data, isAuthenticated: true });
-          set({ initialized: true });
-        } catch {
-          // Session invalid — clear persisted state but keep in-memory token
-          // so subsequent requests can still attempt refresh via interceptor
-          set({ user: null, isAuthenticated: false });
-          set({ initialized: false});
-        } finally {
-          set({ isLoading: false });
-
-        }
+        initializing = (async () => {
+          try {
+            const response = await api.get("/auth/me");
+            const validated = validateOrThrow(
+              MeResponseSchema,
+              response.data,
+              "initialize",
+            );
+            get().setUser(validated.data);
+          } catch (error) {
+            const offline = isAxiosError(error) && !error.response;
+            const { user } = get();
+            if (offline && user) {
+              set({ status: "authenticated", isAuthenticated: true });
+            } else {
+              get().clearAuth();
+            }
+          } finally {
+            set({ isLoading: false });
+            initializing = null;
+          }
+        })();
+        return initializing;
       },
     }),
     {
       name: "nailbook-auth",
       storage: createJSONStorage(() => localStorage),
-      // Only persist non-sensitive data — accessToken stays in memory only
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: !!state.user ,
-      }),
-      // onRehydrateStorage: () => 
-      //   (_state, _error) => {},
+      // Only an offline display hint is persisted; the session itself lives in the httpOnly cookie.
+      partialize: (state) => ({ user: state.user }),
     },
   ),
 );

@@ -4,7 +4,7 @@
  * §7.1: No full-page spinners — skeleton loading only.
  * §10: Skip-to-content link enabled.
  */
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -90,27 +90,15 @@ function PageFallback() {
 }
 
 /**
- * Calls `GET /auth/me` once on mount to re-validate the persisted session
- * and obtain a fresh access token via the silent-refresh interceptor.
+ * Calls `GET /auth/me` once on mount to check whether the httpOnly session
+ * cookie is still valid. Route guards wait on `status` until this resolves.
  */
 function AuthInitializer() {
   const initialize = useAuthStore((s) => s.initialize);
-  const hydrated = useAuthStore((s) => s.hydrated);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    const token = useAuthStore.getState().accessToken;
-    if (hydrated && isAuthenticated && !hasInitialized.current) {
-      hasInitialized.current = true;
-      // Skip /auth/me when a fresh access token already exists (post-login).
-      // initialize() is only needed to obtain a token via silent-refresh
-      // when rehydrating a persisted session after a page reload.
-      if (!token) {
-        initialize();
-      }
-    }
-  }, [hydrated, isAuthenticated, initialize]);
+    void initialize();
+  }, [initialize]);
 
   return null;
 }

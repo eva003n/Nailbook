@@ -4,16 +4,13 @@ import { useAuthStore } from "@/store/auth.store";
 /**
  * Wraps every authenticated route.
  *
- * While Zustand persist is rehydrating from localStorage (`hydrated === false`),
- * we show a minimal loading indicator instead of flashing to the login page.
- * Once hydrated we check `isAuthenticated` — which is persisted across refreshes.
+ * The session cookie is httpOnly, so until `/auth/me` resolves (`status === "unknown"`)
+ * we show a loading indicator instead of flashing to the login page.
  */
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const {isAuthenticated,initialize} = useAuthStore()
-  const hydrated = useAuthStore.persist.hasHydrated()
+  const status = useAuthStore((s) => s.status);
 
-const isInitialized = initialize
-  if (!hydrated || !isInitialized) {
+  if (status === "unknown") {
     return (
       <div
         className="page"
@@ -41,7 +38,7 @@ const isInitialized = initialize
     );
   }
 
-  if (!isAuthenticated) {
+  if (status === "unauthenticated") {
     return <Navigate to="/login" replace />;
   }
 

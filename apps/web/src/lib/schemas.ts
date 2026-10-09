@@ -73,7 +73,7 @@ export const UserSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   email: z.string().email(),
-  role: z.enum(["ADMIN", "OWNER", "STAFF"]),
+  role: z.enum(["OWNER", "STAFF"]),
   isActive: z.boolean().optional(),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),

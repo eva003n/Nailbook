@@ -26,8 +26,8 @@ api.interceptors.response.use(
       window.location.pathname !== "/login"
     ) {
       original._retry = true;
+      // Session expired (30 min idle / 12 h absolute): ProtectedRoute redirects to /login.
       useAuthStore.getState().clearAuth();
-      window.location.href = "/login";
     }
     return Promise.reject(error);
   },

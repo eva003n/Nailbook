@@ -1,12 +1,10 @@
-import  { useAuthStore } from "@/store/auth.store";
+import { useAuthStore } from "@/store/auth.store";
 import { Navigate } from "react-router-dom";
 
 export default function PublicRoute({ children }: { children: React.ReactNode }) {
-  const {isAuthenticated,initialize} = useAuthStore()
-  const hydrated = useAuthStore.persist.hasHydrated()
+  const status = useAuthStore((s) => s.status);
 
-const isInitialized = initialize
-  if (!hydrated || !isInitialized) {
+  if (status === "unknown") {
     return (
       <div
         className="page"
@@ -34,7 +32,7 @@ const isInitialized = initialize
     );
   }
 
-  if (isAuthenticated) {
+  if (status === "authenticated") {
     return <Navigate to="/dashboard" replace />;
   }
 
