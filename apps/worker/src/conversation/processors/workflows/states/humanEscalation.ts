@@ -1,6 +1,6 @@
 import type { StateHandlerContext, StateTransitionResult } from "../types.js";
 import { resetInvalidCount } from "../session.js";
-import { createRedisClient, } from "@wannys-nails/core";
+import { createRedisClient, } from "@nailbook/core";
 import { log as logger, _config as config, redis, prisma } from "../../../../lib/index.js";
 import { sendMessage } from "../whatsapp.js";
 
@@ -29,7 +29,7 @@ export async function handleHumanEscalation(
   // 1. Send notification to owner via SSE/Redis pubsub
   try {
     const notificationPayload = JSON.stringify({
-      title: "Customer needs help — Wanny's Nails",
+      title: "Customer needs help — Nailbook",
       body: `${customerName} (${phone}) needs assistance.`,
       data: {
         url: ctx.session.customerId
@@ -88,7 +88,7 @@ export async function handleHumanEscalation(
     "I'm going to connect you with our staff",
     "Please wait a moment — someone will be with you shortly.",
     "",
-    `You can also call us on ${config.APP_NAME === "Wanny's Nails" ? "+254 700 000 000" : config.APP_NAME}.`,
+    `You can also call us on ${config.APP_NAME === "Nailbook" ? "+254 700 000 000" : config.APP_NAME}.`,
   ].join("\n");
 
   return {

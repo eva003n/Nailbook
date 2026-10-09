@@ -23,7 +23,7 @@ vi.mock("../../../../lib/index.js", () => ({
   notificationQueue: {},
 }));
 
-vi.mock("@wannys-nails/core", async (importOriginal: () => Promise<unknown>) => {
+vi.mock("@nailbook/core", async (importOriginal: () => Promise<unknown>) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,

@@ -1,8 +1,8 @@
-# Wanny's Nails — Nail Salon Booking & WhatsApp Automation Platform
+# Nailbook — Nail Salon Booking & WhatsApp Automation Platform
 
 ## Product Vision
 
-Wanny's Nails is a booking management platform purpose-built for a Kenyan nail salon. Customers book, pay, and receive reminders entirely through WhatsApp. Salon owners and staff manage the business through a Progressive Web App (PWA). Payments run on M-Pesa Daraja API v3.
+Nailbook is a booking management platform purpose-built for a Kenyan nail salon. Customers book, pay, and receive reminders entirely through WhatsApp. Salon owners and staff manage the business through a Progressive Web App (PWA). Payments run on M-Pesa Daraja API v3.
 
 The system is designed to eliminate missed appointments, reduce manual scheduling effort, improve the client payment experience, and give the salon owner full visibility into revenue and capacity — all without requiring customers to download an app or learn a new interface.
 
@@ -143,7 +143,7 @@ wanny-s-nails/
 │   │   ├── test/                   # Integration test helpers + setup
 │   │   └── (vitest.config.ts, eslint.config.js, tsconfig.*)
 │   ├── packages/                   # Container for shared TypeScript library packages
-│   │   └── core/                   # @wannys-nails/core
+│   │   └── core/                   # @nailbook/core
 │   │       ├── prisma/             # Prisma schema + migrations + seed
 │   │       └── src/
 │   │           ├── booking/        # application/, domain/, infrastructure/, ports/

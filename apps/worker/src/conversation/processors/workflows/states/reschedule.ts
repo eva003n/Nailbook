@@ -15,7 +15,7 @@ import {
   NotificationService,
   createQueues,
   getAvailableSlots,
-} from "@wannys-nails/core";
+} from "@nailbook/core";
 
 const log = logger.child({ module: "fsm-reschedule" });
 

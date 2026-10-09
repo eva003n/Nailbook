@@ -14,7 +14,7 @@ vi.mock("../../../../lib/index.js", () => ({
   paymentQueue: {},
 }));
 
-vi.mock("@wannys-nails/core", async (importOriginal: () => Promise<unknown>) => {
+vi.mock("@nailbook/core", async (importOriginal: () => Promise<unknown>) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
@@ -30,7 +30,7 @@ vi.mock("@wannys-nails/core", async (importOriginal: () => Promise<unknown>) => 
 });
 
 const { handleBookingConfirmation } = await import("./bookingConfirmation.js");
-const { BookingConflictError, ServiceInactiveError } = await import("@wannys-nails/core");
+const { BookingConflictError, ServiceInactiveError } = await import("@nailbook/core");
 
 function makeContext(overrides?: Partial<StateHandlerContext>): StateHandlerContext {
   return {

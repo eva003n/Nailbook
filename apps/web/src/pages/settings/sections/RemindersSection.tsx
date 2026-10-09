@@ -7,7 +7,7 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 
-const REMINDER_KEY = "wannysnails:reminderSettings";
+const REMINDER_KEY = "nailbook:reminderSettings";
 
 interface ReminderSettings {
   reminder24h: boolean;
@@ -19,8 +19,8 @@ interface ReminderSettings {
 const DEFAULTS: ReminderSettings = {
   reminder24h: true,
   reminder1h: true,
-  message24h: "Hi {name}! This is a reminder about your appointment tomorrow at {time} — {service} at Wanny's Nails. See you soon! 💅",
-  message1h: "Hi {name}! Your {service} appointment at Wanny's Nails starts in 1 hour at {time}. See you soon! 💅",
+  message24h: "Hi {name}! This is a reminder about your appointment tomorrow at {time} — {service} at Nailbook. See you soon! 💅",
+  message1h: "Hi {name}! Your {service} appointment at Nailbook starts in 1 hour at {time}. See you soon! 💅",
 };
 
 function loadSettings(): ReminderSettings {

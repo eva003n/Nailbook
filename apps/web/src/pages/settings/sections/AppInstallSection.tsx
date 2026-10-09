@@ -70,7 +70,7 @@ export function AppInstallSection() {
               lineHeight: 1.5,
             }}
           >
-            Add Wanny's Nails to your home screen for quick access, offline
+            Add Nailbook to your home screen for quick access, offline
             support, and a faster experience.
           </p>
         </div>

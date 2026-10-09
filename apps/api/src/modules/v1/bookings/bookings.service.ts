@@ -32,7 +32,7 @@ import {
   ServiceInactiveError as CoreServiceInactiveError,
   CustomerNotFoundError as CoreCustomerNotFoundError,
   type ActorType,
-} from "@wannys-nails/core";
+} from "@nailbook/core";
 
 const log = logger.child({ module: "bookings.service" });
 

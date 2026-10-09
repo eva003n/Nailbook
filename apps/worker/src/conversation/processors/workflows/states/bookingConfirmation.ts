@@ -17,7 +17,7 @@ import {
   OutsideBusinessHoursError,
   BusinessClosedError,
   BookingConflictError,
-} from "@wannys-nails/core";
+} from "@nailbook/core";
 
 const log = logger.child({ module: "fsm-booking-confirm" });
 

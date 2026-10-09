@@ -1,5 +1,5 @@
 /**
- * Wanny's Nails — Service Worker
+ * Nailbook — Service Worker
  *
  * Handles:
  *  - Push notification display and click handling
@@ -78,7 +78,7 @@ self.addEventListener("push", (event) => {
   if (!event.data) return;
 
   const data = event.data.text() ?? {
-    title: "Wanny's Nails",
+    title: "Nailbook",
     body: "You have a new notification.",
     icon: "/icons/192.png",
     data: { url: "/", notificationId: "" },

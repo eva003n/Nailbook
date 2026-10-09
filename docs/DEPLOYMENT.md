@@ -1,4 +1,4 @@
-# Deployment — Wanny's Nails
+# Deployment — Nailbook
 
 **Version:** 1.0
 
@@ -132,11 +132,11 @@ CMD ["sh", "-c", "node dist/scripts/migrate.js && node dist/server.js"]
 
 One image runs the conversation, payment and notification workers in a single
 process (see ADR-011). The Dockerfile is `apps/worker/Dockerfile`; it builds
-`@wannys-nails/core` and `@wannys-nails/worker` and starts `node dist/index.js`
+`@nailbook/core` and `@nailbook/worker` and starts `node dist/index.js`
 from `/app/apps/worker`.
 
 ```bash
-docker build -f apps/worker/Dockerfile -t wannys-worker .
+docker build -f apps/worker/Dockerfile -t nailbook-worker .
 ```
 
 ### Production Docker Compose

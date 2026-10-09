@@ -1,4 +1,4 @@
-# WhatsApp Automation — Wanny's Nails
+# WhatsApp Automation — Nailbook
 
 **Version:** 1.2
 
@@ -482,7 +482,7 @@ stateDiagram-v2
    - Engine sends main menu interactive list
 3. **If not found (new customer):**
    - Transition → `DATA_COLLECTION`
-   - Engine sends entry prompt: "Hi! Welcome to Wanny's Nails! 👋\n\nWe'd love to get to know you better.\nWhat's your name?"
+   - Engine sends entry prompt: "Hi! Welcome to Nailbook! 👋\n\nWe'd love to get to know you better.\nWhat's your name?"
    - Set `collectionPhase: "NAME"`
 
 **Input:** Any message (used for global intent detection only — STOP/HUMAN/MENU)
@@ -509,7 +509,7 @@ stateDiagram-v2
 
 **Bot message (on entry):**
 ```
-Hi! Welcome to Wanny's Nails! 👋
+Hi! Welcome to Nailbook! 👋
 
 We'd love to get to know you better.
 What's your name?
@@ -557,10 +557,10 @@ Could you share your WhatsApp phone number for automated reminders?
 
 ```
 Header:
-Wanny's Nails 💅
+Nailbook 💅
 
 Body:
-Hi [name]! 👋 Welcome to Wanny's Nails.
+Hi [name]! 👋 Welcome to Nailbook.
 How can we help you today?
 
 Button:
@@ -865,7 +865,7 @@ If `invalidInputCount >= 3` → `HUMAN_ESCALATION`.
 **Bot message (M-Pesa):**
 
 ```
-Thank you for booking with Wanny's Nails! 🎉💅
+Thank you for booking with Nailbook! 🎉💅
 
 📋 Reference: NB-2025-00123
 ✂️ Service: Gel Manicure
@@ -881,7 +881,7 @@ We'll send you a reminder 24 hours before your appointment. See you soon! 😊
 **Bot message (Cash):**
 
 ```
-Thank you for booking with Wanny's Nails! 🎉💅
+Thank you for booking with Nailbook! 🎉💅
 
 📋 Reference: NB-2025-00123
 ✂️ Service: Gel Manicure
@@ -934,7 +934,7 @@ Payment received! ✅
 ✂️ Service: Gel Manicure
 📅 Thursday, 5 June 2025
 ⏰ 2:00 PM
-📍 Wanny's Nails, Nairobi
+📍 Nailbook, Nairobi
 
 We'll send you a reminder 24 hours before. See you then! 💅
 ```
@@ -1090,7 +1090,7 @@ You can also call us on +254 700 000 000.
 
 ```json
 {
-  "title": "Customer needs help — Wanny's Nails",
+  "title": "Customer needs help — Nailbook",
   "body": "{{customerName}} ({{phone}}) needs assistance.",
   "data": {
     "url": "/customers/{{customerId}}",
@@ -1267,7 +1267,7 @@ This is a reminder about your appointment tomorrow:
 ✂️ {{2}}
 📅 {{3}}
 ⏰ {{4}}
-📍 Wanny's Nails, Nairobi
+📍 Nailbook, Nairobi
 
 Reply "reschedule" or "cancel" if your plans change.
 See you soon! 💅
@@ -1281,7 +1281,7 @@ Variables: `[customerName, serviceName, date, time]`
 Hi {{1}}! Your appointment is in 1 hour.
 
 ✂️ {{2}} at {{3}}
-📍 Wanny's Nails, Nairobi
+📍 Nailbook, Nairobi
 
 See you soon! 💅
 ```
@@ -1294,7 +1294,7 @@ Your appointment has been confirmed! ✅
 📋 Ref: {{1}}
 ✂️ {{2}}
 📅 {{3}} at {{4}}
-📍 Wanny's Nails, Nairobi
+📍 Nailbook, Nairobi
 
 See you then! 💅
 ```

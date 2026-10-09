@@ -1,4 +1,4 @@
-# Database Design — Wanny's Nails
+# Database Design — Nailbook
 
 **Version:** 2.0
 **Database:** PostgreSQL 18
@@ -272,7 +272,7 @@ erDiagram
     User ||--o{ NotificationSubscription : "preferences"
 ```
 
-![Diagram representing ERD for wanny nails](/assets/images/wanny-nails-ERD.png)
+![Diagram representing ERD for Nailbook](/assets/images/wanny-nails-ERD.png)
 ---
 
 ## Table Definitions

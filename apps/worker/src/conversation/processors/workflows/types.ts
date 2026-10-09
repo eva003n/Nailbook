@@ -1,5 +1,5 @@
 // ─── Conversation States ───
-import type { Message } from "@wannys-nails/core";
+import type { Message } from "@nailbook/core";
 export type ConversationState =
   | "IDLE"
   | "GREETING"

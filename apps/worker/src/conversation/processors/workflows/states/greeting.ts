@@ -22,13 +22,13 @@ function buildMainMenuMessage(
     greeting = "Good Evening.";
   }
 
-  const greetingMessage =`Hi ${name}, I am a digital assistant of Nail's by Wanny👋 `
+  const greetingMessage =`Hi ${name}, I am a digital assistant of Nailbook👋 `
    
 
   return {
     type: "interactive_list",
     text: `${greetingMessage}\n I will try to answer your question, if i don't know the answer i will send it over to our team.\n How can we help you today?`,
-    listTitle: "Nail's by Wanny 💅",
+    listTitle: "Nailbook 💅",
     listButtonText: "Choose an option",
     listSections: [
       {

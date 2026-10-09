@@ -1,4 +1,4 @@
-# Testing Guide — Wanny's Nails
+# Testing Guide — Nailbook
 
 This document is the single source of truth for how tests are written across this
 monorepo. It applies equally to a human contributor and to an AI coding agent
@@ -16,7 +16,7 @@ regressions instead of catching them.
 
 ```
 apps/
-  api/            Express + Prisma + BullMQ backend, WannyBot logic
+  api/            Express + Prisma + BullMQ backend, NailbookBot logic
     vitest.config.ts
     src/
   web/            React 19 + Vite PWA admin dashboard

@@ -4,9 +4,9 @@ import { logger } from "../../../shared/lib/index.js";
 import { conversationQueue, paymentQueue } from "../../../shared/lib/index.js";
 
 import { redis } from "../../../shared/lib/index.js";
-import { whatsappTransport, type WebhookEvent } from "@wannys-nails/core";
+import { whatsappTransport, type WebhookEvent } from "@nailbook/core";
 import { DarajaCallbackSchema } from "./schemas.js";
-import { JOB_NAMES } from "@wannys-nails/core";
+import { JOB_NAMES } from "@nailbook/core";
 
 const log = logger.child({ module: "webhooks.controller" });
 

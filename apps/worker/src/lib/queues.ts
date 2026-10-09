@@ -1,4 +1,4 @@
-import { createQueues } from "@wannys-nails/core";
+import { createQueues } from "@nailbook/core";
 import { _config } from "./config.js";
 import { queueRedis } from "./redis.js";
 

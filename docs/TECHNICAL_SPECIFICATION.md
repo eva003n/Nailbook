@@ -40,7 +40,7 @@
 - Admin actions (approve, cancel, reschedule) must be logged with staff ID
 ## Architecture Overview
 
-Wanny's Nails is a three-tier system:
+Nailbook is a three-tier system:
 
 1. **Presentation layer** — WhatsApp Cloud API (customer) and PWA (salon staff/owner)
 2. **Application layer** — Node.js/Express REST API with background job processing via BullMQ
@@ -74,7 +74,7 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for Mermaid diagrams.
 └─────────────┘                                       │ webhook POST
                                                       ▼
 ┌─────────────┐     HTTPS REST API         ┌─────────────────────┐
-│  PWA App    │◄──────────────────────────►│   WAnny's Nail Backend   │
+│  PWA App    │◄──────────────────────────►│   Nailbook Backend   │
 │(owner/staff)│                            │   (Express + TS)     │
 └─────────────┘                            └──┬───────┬───────┬──┘
                                               │       │       │

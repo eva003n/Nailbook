@@ -1,4 +1,4 @@
-# AGENTS.md — Wanny's Nails
+# AGENTS.md — Nailbook
 
 WhatsApp booking + M-Pesa payments for a Kenyan nail salon — Node.js/Express API,
 React 19 PWA, BullMQ workers, and a shared packages library (pnpm monorepo).
@@ -35,7 +35,7 @@ apps/api/src/
               # slots | webhooks
   shared/     # middleware | lib | utils | types
 
-apps/packages/core/src/         # @wannys-nails/core — shared domain (booking), utils,
+apps/packages/core/src/         # @nailbook/core — shared domain (booking), utils,
                            # notification schemas; Prisma schema + seed live here (prisma/)
 
 apps/web/src/

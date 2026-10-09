@@ -1,4 +1,4 @@
-# Design Rules — Wanny's Nails PWA
+# Design Rules — Nailbook PWA
 
 **Source of truth:** `UI_UX_SPECIFICATION.md`  
 Read it before implementing any screen, component, or interaction.

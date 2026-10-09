@@ -30,7 +30,7 @@ export const configSchema = z.object({
   DARAJA_CALLBACK_URL: z.string().default(""),
   RESEND_API_KEY: z.string().default(""),
   GEMINI_API_KEY: z.string().default(""),
-  APP_NAME: z.string().default("Wanny's Nails"),
+  APP_NAME: z.string().default("Nailbook"),
   LOG_LEVEL: z.string().default("info"),
   LOGTAIL_INGESTION_HOST: z.string().default(""),
   LOGTAIL_SOURCE_TOKEN: z.string().default(""),

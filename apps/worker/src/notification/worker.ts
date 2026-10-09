@@ -13,7 +13,7 @@ import {
   type NotificationJobData,
   JOB_NAMES,
   type OutboundMessage,
-} from "@wannys-nails/core";
+} from "@nailbook/core";
 import { whatsappProcessor } from "./processors/whatsapp.processor.js";
 import {
   emailProcessor,

@@ -1,5 +1,5 @@
 /**
- * PM2 ecosystem config — Wanny's Nails
+ * PM2 ecosystem config — Nailbook
  *
  * Run with:
  *   pm2 start ecosystem.config.js --env production
