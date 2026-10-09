@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import session from "express-session"
 
 // Middlewares
 import { errorMiddleware } from "./shared/middleware/error.middleware.js";
@@ -11,7 +12,7 @@ import { globalRateLimit } from "./shared/middleware/rateLimit.middleware.js";
 // Routes
 import { v1Routes } from "./modules/v1/router.js";
 import { logMiddleware } from "./shared/middleware/log.middleware.js";
-import { _config } from "./shared/lib/index.js";
+import { _config, sessionStore } from "./shared/lib/index.js";
 import { notFound } from "./shared/middleware/404.middleware.js";
 import { groupedBoard } from "./shared/lib/index.js";
 
@@ -24,6 +25,7 @@ import { groupedBoard } from "./shared/lib/index.js";
  */
 export function createApp() {
   const app = express();
+  const SESSION_KEY = "session"
 
   // express app is behind a proxy(trust first proxy hoop)
   app.set("trust proxy", 1);
@@ -62,6 +64,25 @@ export function createApp() {
 
   // HTTP request logging
   app.use(logMiddleware);
+
+  // session management
+  app.use(
+    session({
+      name: "sid",
+      secret: _config.COOKIE_SECRET?.split(","),
+      store: sessionStore,
+      resave: false,
+      saveUninitialized: false,
+      rolling: true,
+      cookie: {
+        path: "/",
+        httpOnly: true,
+        secure: _config.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 30 * 60 * 1000, // 30 minutes
+      },
+    }),
+  );
 
 
   // Bull mq queues UI

@@ -14,8 +14,6 @@ router
   .route("/login")
   .post(loginRateLimit, validate(authController.loginSchema), authController.login);
 
-// POST /auth/refresh
-router.route("/refresh").post(refreshRateLimit, authController.refresh);
 
 // POST /auth/logout
 router.route("/logout").delete(authenticate, authController.logout);

@@ -1,11 +1,17 @@
 import { _config } from "./config.js";
 import { logger } from "./logger.js";
 import { createRedisClient } from "@wannys-nails/core";
-
-const connectionName = "api";
+import {IORedisStore} from "connect-ioredis-store"
+const connectionName = "api:";
 
 // shared redis connection for caching | queues
 export const redis = createRedisClient(connectionName, _config);
+
+export const sessionStore =  new IORedisStore({
+  client: redis,
+  prefix: connectionName + "session:"
+});
+
 
 redis.on("connect", () => {
   logger.info(

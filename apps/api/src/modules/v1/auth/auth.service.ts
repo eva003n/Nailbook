@@ -1,10 +1,11 @@
-import bcrypt from "bcryptjs";
+import { compare, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../../shared/lib/index.js";
-import { redis } from "../../../shared/lib/index.js"
+import { redis } from "../../../shared/lib/index.js";
 import { _config } from "../../../shared/lib/index.js";
 import { UnauthorizedError, AccountLockedError } from "../../../shared/types/errors.js";
 import type { JwtPayload } from "../../../shared/middleware/auth.middleware.js";
+import { getPrehash } from "@wannys-nails/core";
 
 interface LoginInput {
   email: string;
@@ -42,7 +43,6 @@ export const authService = {
     const user = await prisma.user.findUnique({
       where: { email: input.email },
     });
-    console.log(user)
 
     if (!user || user.deletedAt) {
       throw new UnauthorizedError("Invalid email or password");
@@ -52,7 +52,10 @@ export const authService = {
       throw new UnauthorizedError("Account is deactivated");
     }
 
-    const isPasswordValid = await bcrypt.compare(input.password, user.passwordHash);
+    const isPasswordValid = await compare(
+      getPrehash(_config.PASSWORD_PEPPER, input.password),
+      user.passwordHash,
+    );
     if (!isPasswordValid) {
       // Increment failed attempts
       const failedKey = FAILED_ATTEMPTS_KEY_PREFIX + input.email;
@@ -73,18 +76,8 @@ export const authService = {
     const failedKey = FAILED_ATTEMPTS_KEY_PREFIX + input.email;
     await redis.del(failedKey);
 
-    const payload: JwtPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    };
-
-    const accessToken = signAccessToken(payload);
-    const refreshToken = signRefreshToken(user.id);
 
     return {
-      accessToken,
-      refreshToken,
       user: {
         id: user.id,
         name: user.name,
@@ -129,14 +122,17 @@ export const authService = {
   },
 
   async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, SALT_ROUNDS);
+    return hash(getPrehash(_config.PASSWORD_PEPPER, password), SALT_ROUNDS);
   },
 
   async changePassword(userId: string, currentPassword: string, newPassword: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedError("User not found");
 
-    const isCurrentValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isCurrentValid = await compare(
+      getPrehash(_config.PASSWORD_PEPPER, currentPassword),
+      user.passwordHash,
+    );
     if (!isCurrentValid) {
       throw new UnauthorizedError("Current password is incorrect");
     }
@@ -160,8 +156,8 @@ export const authService = {
       },
     });
   },
-  async me(user: {id: string}) {
-   return  await prisma.user.findUnique({
+  async me(user: { id: string }) {
+    return await prisma.user.findUnique({
       where: { id: user.id },
       select: {
         id: true,
@@ -170,5 +166,5 @@ export const authService = {
         role: true,
       },
     });
-  }
+  },
 };

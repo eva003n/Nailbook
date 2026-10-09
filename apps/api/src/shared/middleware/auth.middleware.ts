@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { _config } from "../lib/index.js";
 import { UnauthorizedError, ForbiddenError } from "../types/errors.js";
+import { rescheduleBooking } from "../../modules/v1/bookings/bookings.controller.js";
 
 export interface JwtPayload {
   userId: string;
@@ -20,42 +21,30 @@ export interface JwtPayload {
  * Controllers and services must never parse cookies or headers directly — this
  * centralised helper is the single source of truth for auth extraction.
  */
-function extractToken(req: Request): string | undefined {
-  // 1. Signed httpOnly cookie (set by `res.cookie()` with a signing secret)
-  const cookieToken = req.signedCookies?.accessToken as string | undefined;
-  if (cookieToken) return cookieToken;
 
-  // 2. Authorization header (Bearer token)
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) {
-    return authHeader.split(" ")[1];
+const ABSOLUTE_LIFE_TIME = 12 * 60 * 60 * 1000;
+export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
+  if (!req.session.userId) {
+    next(new UnauthorizedError());
+    return;
   }
 
-  return undefined;
-}
-
-export const authenticate = (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-): void => {
-  try {
-    const token = extractToken(req);
-
-    if (!token) {
-      throw new UnauthorizedError("Missing or invalid authorization header");
-    }
-
-    const decoded = jwt.verify(token, _config.JWT_SECRET) as unknown as {userId: string, role: "OWNER" | "STAFF", email: string};
-    req.user = decoded;
-    next();
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      next(error);
-    } else {
-      next(new UnauthorizedError("Invalid or expired token"));
-    }
+  if (
+    req.session.authenticatedAt &&
+    Date.now() - req.session.authenticatedAt >= ABSOLUTE_LIFE_TIME
+  ) {
+    req.session.destroy((err) => {
+      if (err) return next(err);
+      next(new UnauthorizedError());
+      return;
+    });
   }
+
+  req.user = {
+    role: req.session.role as "OWNER" | "STAFF",
+    userId: req.session.userId as string,
+  };
+  next();
 };
 
 export const requireRole = (...roles: string[]) => {

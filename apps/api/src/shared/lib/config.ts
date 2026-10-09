@@ -7,6 +7,7 @@ export const configSchema = z.object({
   DATABASE_URL: z.string().default(""),
   API_DOC_URL: z.string().default(""),
   REDIS_URL: z.string().default(""),
+  PASSWORD_PEPPER: z.string().default(""),
   JWT_SECRET: z.string().default(""),
   JWT_EXPIRES_IN: z.string().default("15m"),
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
