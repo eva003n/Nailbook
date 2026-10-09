@@ -13,7 +13,7 @@ const isDevelopment = (process.env.NODE_ENV || "development") === "development";
 
 if (isDevelopment) {
   const dotenv = await import("dotenv");
-  const relativeFilePath = isDevelopment ? "../.env" : "../.env.production";
+  const relativeFilePath = "../.env";
   dotenv.config({ path: path.resolve(__dirname, relativeFilePath)});
 }
 
