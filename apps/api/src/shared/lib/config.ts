@@ -4,6 +4,7 @@ import {z} from "zod"
 
 export const configSchema = z.object({
   BASE_URL: z.string().default(""),
+  DEBUG: z.string().default(""),
   DATABASE_URL: z.string().default(""),
   API_DOC_URL: z.string().default(""),
   REDIS_URL: z.string().default(""),

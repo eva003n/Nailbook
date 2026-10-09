@@ -1,4 +1,13 @@
-import rateLimit from "express-rate-limit";
+import type { Request } from "express";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import {logger} from "../lib/logger.js"
+import { rateLimitStore } from "../lib/redis.js";
+
+const rateLimitLogger = logger.child({module: "rate limiter"})
+
+// scoped per limiter so no two limiters can ever produce the same key for a request
+const ipKey = (scope: string) => (req: Request): string =>
+  `${scope}:${ipKeyGenerator(req.ip ?? "unknown")}`;
 
 /**
  * Global rate limiter: 300 requests per 15 minutes per IP.
@@ -8,6 +17,8 @@ export const globalRateLimit = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: true,
+  store: rateLimitStore("global"),
+  keyGenerator: ipKey("global"),
   message: {
     error: {
       code: "RATE_LIMITED",
@@ -15,6 +26,7 @@ export const globalRateLimit = rateLimit({
       details: { retryAfterSeconds: 60 },
     },
   },
+  logger: rateLimitLogger,
 });
 
 /**
@@ -25,6 +37,8 @@ export const loginRateLimit = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: true,
+  store: rateLimitStore("login"),
+  keyGenerator: ipKey("login"),
   message: {
     error: {
       code: "RATE_LIMITED",
@@ -32,6 +46,7 @@ export const loginRateLimit = rateLimit({
       details: { retryAfterSeconds: 60 },
     },
   },
+  logger: rateLimitLogger,
 });
 
 /**
@@ -42,6 +57,8 @@ export const refreshRateLimit = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: true,
+  store: rateLimitStore("refresh"),
+  keyGenerator: ipKey("refresh"),
   message: {
     error: {
       code: "RATE_LIMITED",
@@ -49,6 +66,7 @@ export const refreshRateLimit = rateLimit({
       details: { retryAfterSeconds: 60 },
     },
   },
+  logger: rateLimitLogger,
 });
 
 /**
@@ -59,10 +77,14 @@ export const stkPushRateLimit = rateLimit({
   max: 3, // attempts
   standardHeaders: true,
   legacyHeaders: true,
-  // keyGenerator: (req) => {
-  //   // return `${req.ip}-${req.body.bookingId}`;
-  //   return `${req.body.bookingId}`;
-  // },
+  store: rateLimitStore("stk-push"),
+  // body is not validated yet at this point, so fall back to IP when bookingId is missing
+  keyGenerator: (req: Request): string => {
+    const bookingId: unknown = req.body?.bookingId;
+    return typeof bookingId === "string" && bookingId
+      ? `stk-push:${bookingId}`
+      : ipKey("stk-push")(req);
+  },
   message: {
     error: {
       code: "RATE_LIMITED",
@@ -70,6 +92,7 @@ export const stkPushRateLimit = rateLimit({
       details: { retryAfterSeconds: 60 },
     },
   },
+  logger: rateLimitLogger,
 });
 
 /**
@@ -80,6 +103,8 @@ export const webhookRateLimit = rateLimit({
   max: 500,
   standardHeaders: true,
   legacyHeaders: true,
+  store: rateLimitStore("webhook"),
+  keyGenerator: ipKey("webhook"),
   message: {
     error: {
       code: "RATE_LIMITED",
@@ -87,4 +112,5 @@ export const webhookRateLimit = rateLimit({
       details: { retryAfterSeconds: 60 },
     },
   },
+  logger: rateLimitLogger,
 });
