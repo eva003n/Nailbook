@@ -11,7 +11,7 @@ import { Queue_Names } from "../../constants.js";
 import type { Redis } from "ioredis";
 
 // ─── Queue factory ─────────────────────────────────────────
-export function createQueues(connection: Redis) {
+export function createQueues(connection: Redis, keyPrefix: string) {
   return {
     notificationQueue: new Queue(Queue_Names.NOTIFICATIONS, {
       connection: connection as unknown as ConnectionOptions,
@@ -21,6 +21,7 @@ export function createQueues(connection: Redis) {
         removeOnComplete: true,
         removeOnFail: { age: 86400, count: 100 },
       },
+      prefix: `${keyPrefix + Queue_Names.NOTIFICATIONS}`,
     }),
     conversationQueue: new Queue(Queue_Names.CONVERSATIONS, {
       connection: connection as unknown as ConnectionOptions,
@@ -30,6 +31,7 @@ export function createQueues(connection: Redis) {
         removeOnComplete: true,
         removeOnFail: { age: 86400, count: 100 },
       },
+      prefix: `${keyPrefix + Queue_Names.CONVERSATIONS}`,
     }),
     paymentQueue: new Queue(Queue_Names.PAYMENTS, {
       connection: connection as unknown as ConnectionOptions,
@@ -39,6 +41,7 @@ export function createQueues(connection: Redis) {
         removeOnComplete: true,
         removeOnFail: { age: 86400, count: 100 },
       },
+      prefix: `${keyPrefix + Queue_Names.PAYMENTS}`,
     }),
   };
 }
