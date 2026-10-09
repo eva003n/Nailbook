@@ -3,7 +3,7 @@
  *
  * One process runs a BullMQ Worker per queue and registers a single graceful
  * shutdown that drains all of them.
- * Run: node dist/index.js
+
  */
 
 import {
@@ -20,6 +20,7 @@ import { createConversationWorker } from "./conversation/worker.js";
 import { createNotificationWorker } from "./notification/worker.js";
 import { createPaymentWorker } from "./payment/worker.js";
 import {createServer} from "http"
+
 const workers = [
   createConversationWorker(),
   createPaymentWorker(),
