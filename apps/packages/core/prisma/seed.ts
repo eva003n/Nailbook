@@ -174,7 +174,7 @@ const defaultNotificationSubscriptions = [
   },
   {
     channel: "EMAIL" as const,
-    endpoint: "wanny@wannysnails.com",
+    endpoint: "wanny@nailbook.com",
     isActive: true,
   },
 ];
@@ -293,7 +293,7 @@ async function seedNotificationSubscriptions() {
 
   // Get the owner user
   const owner = await prisma.user.findUnique({
-    where: { email: "wanny@wannysnails.com" },
+    where: { email: "wanny@nailbook.com" },
   });
   if (!owner) {
     console.log(
