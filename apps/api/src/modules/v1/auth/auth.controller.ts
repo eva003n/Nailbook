@@ -50,7 +50,9 @@ export const login = asyncHandler(async (req: Request, res: Response, next: Next
 
 export const logout = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   req.session.destroy((err) => {
+
     if (err) return next(err);
+    res.clearCookie("sid");
     noContent(res);
   });
 });
