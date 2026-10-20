@@ -5,5 +5,6 @@ declare module "express-session" {
       userId: string;
       role: "OWNER" | "STAFF";
       authenticatedAt: number;
+      isSseConnected: boolean
     }
 }

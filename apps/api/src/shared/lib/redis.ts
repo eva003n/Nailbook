@@ -7,7 +7,7 @@ import {RedisStore, type RedisReply} from "rate-limit-redis"
 /* ----------- Redis connection instances ---------- */
 const CONNECTION_NAME = "api"
 // ioredis prepends this to every key automatically, so stores below must only add their own segment (store:...)
-const API_KEY_PREFIX = `${_config.APP_NAME}:api:`
+const API_KEY_PREFIX = `${_config.APP_NAME}-api:`
 
 // shared redis connection for caching | data store
 export const redis = createRedisClient({name: CONNECTION_NAME, config:_config, keyPrefix: API_KEY_PREFIX });
