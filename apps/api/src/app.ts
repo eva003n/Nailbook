@@ -70,12 +70,12 @@ export function createApp() {
   // session management
   app.use(
     session({
-      name: "sid",
+      name: "user_session",
       secret: _config.COOKIE_SECRET?.split(","),
       store: sessionStore,
       resave: false,
       saveUninitialized: false,
-      rolling: true,
+      // rolling: true,
       cookie: {
         path: "/",
         httpOnly: true,
