@@ -1,3 +1,4 @@
+
 import type { SSEEventName, Listener } from "./mock";
 
 let eventSource: EventSource | null = null;
@@ -20,8 +21,6 @@ export function connect(
 
   eventSource.onerror = () => {
     setBannerVisible(true);
-    // close previous connection
-    // eventSource?.close();
 
   // reconnects automatically via server sent retry field
   };

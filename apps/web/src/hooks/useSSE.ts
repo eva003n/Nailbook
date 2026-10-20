@@ -1,21 +1,25 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUiStore } from "@/store/ui.store";
-import { subscribeSSE, disconnectSSE, connectSSE,} from "@/lib/sse";
+import { subscribeSSE, disconnectSSE, connectSSE } from "@/lib/sse";
 import { bookingKeys } from "@/pages/bookings/hooks/useBookings";
 import { notificationKeys } from "@/pages/notifications/hooks/useNotifications";
+import api from "@/lib/api";
 
 // Mirrors the production useSSE contract from frontend.md: subscribes to
 // booking/payment/notification events and invalidates the relevant query keys.
 export function useSSE() {
   const queryClient = useQueryClient();
   const setSseBannerVisible = useUiStore((s) => s.setSseBannerVisible);
- 
 
   useEffect(() => {
-    connectSSE(setSseBannerVisible)
+    connectSSE(setSseBannerVisible);
 
     const unsubs = [
+      subscribeSSE("ping", async() => {
+       await api.head(`${import.meta.env.VITE_API_URL}/events`);
+      }),
+      
       subscribeSSE("booking.created", () => {
         queryClient.invalidateQueries({ queryKey: bookingKeys.all });
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -34,7 +38,9 @@ export function useSSE() {
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       }),
       subscribeSSE("notification.new", () => {
-        queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount });
+        queryClient.invalidateQueries({
+          queryKey: notificationKeys.unreadCount,
+        });
         queryClient.invalidateQueries({ queryKey: notificationKeys.all });
       }),
     ];
@@ -43,7 +49,7 @@ export function useSSE() {
     return () => {
       // remove all listeners free memory
       unsubs.forEach((u) => u());
-      disconnectSSE()
+      disconnectSSE();
     };
   }, [queryClient, setSseBannerVisible]);
 }

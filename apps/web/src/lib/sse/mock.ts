@@ -5,6 +5,7 @@
 // identically to the production wiring.
 
 export type SSEEventName =
+   "ping" 
   | "booking.created"
   | "booking.deleted"
   | "booking.approved"
