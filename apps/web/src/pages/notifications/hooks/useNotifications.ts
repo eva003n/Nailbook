@@ -33,7 +33,6 @@ export function useUnreadCount() {
       return validateOrThrow(UnreadCountSchema, response.data.data, "GET /notifications/unread-count");
     },
     staleTime: 30_000,
-    refetchInterval: 60_000, // poll every minute as fallback
   });
 }
 
