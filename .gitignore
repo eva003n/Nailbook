@@ -12,3 +12,4 @@
 /**/**/*.tsbuildinfo
 notes.txt
 **/test-results
+**/migrations
