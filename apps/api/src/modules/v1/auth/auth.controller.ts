@@ -27,6 +27,7 @@ export const login = asyncHandler(async (req: Request, res: Response, next: Next
       req.session.userId = result.user.id;
       req.session.role = result.user.role;
       req.session.authenticatedAt = Date.now();
+      req.session.isSseConnected = false;
 
 
       req.session.save((err) => {
