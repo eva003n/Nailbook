@@ -107,7 +107,7 @@ export const paymentsService = {
     return {
       paymentId: payment.id,
       checkoutRequestId: null,
-      message: `Payment request queued for ${phoneNumber}. You will receive an M-Pesa prompt shortly.`,
+      message: `M-Pesa payment prompt will be sent shortly.`,
     };
   },
 

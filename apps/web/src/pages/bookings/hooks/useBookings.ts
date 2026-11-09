@@ -9,6 +9,7 @@ import {
 } from "@/lib/schemas";
 import type { Booking, BookingFilters } from "@/lib/schemas";
 import { paymentKeys } from "@/pages/payments/hooks/usePayments";
+import {v4 as uuidv4} from "uuid"
 
 export interface BookingMeta {
   page: number;
@@ -290,10 +291,22 @@ export function useSendPaymentRequest() {
       bookingId: string;
       phoneNumber: string;
     }) => {
+      let idempotencyKey = null;
+      if(sessionStorage.getItem("idempotencyKey") === null) {
+        idempotencyKey = uuidv4();
+        sessionStorage.setItem("idempotencyKey", idempotencyKey)
+
+
+      }else {
+        idempotencyKey = sessionStorage.getItem("idempotencyKey")
+      }
+       
       const { data } = await api.post("/payments/stk-push", {
         bookingId,
         phoneNumber: phoneNumber.replace(/[^0-9]/g, ""),
-      });
+      }, {headers: {
+        "idempotency-key": idempotencyKey
+      }});
       // STK push returns { paymentId, checkoutRequestId, message }, not a booking
       return data.data as {
         paymentId: string;

@@ -157,7 +157,7 @@ Use **BullMQ** (Redis-backed job queue for Node.js).
 
 ### Context
 
-Customers are to interact exclusively through WhatsApp. We need to send and receive WhatsApp messages programmatically.
+Customers book and manage appointments on the website. WhatsApp remains a customer messaging channel for confirmations, reminders, and support, so the system needs to send and receive WhatsApp messages programmatically.
 
 ### Decision
 
@@ -171,13 +171,13 @@ Use **Meta WhatsApp Cloud API** (the hosted, cloud-based API).
 | Twilio WhatsApp | Intermediary adds cost and latency. Direct Meta API is faster and cheaper at scale. Twilio's WhatsApp routes through Meta anyway. |
 | 360dialog | Similar intermediary concerns. Direct API preferred. |
 | Telegram Bot API | Target users are on WhatsApp, not Telegram. Not substitutable. |
-| SMS-only | WhatsApp supports rich interactive messages (buttons, lists) that significantly improve the booking UX. Email is a fallback, not primary. |
+| SMS-only | WhatsApp supports rich interactive messages and remains useful for appointment notifications and customer support. Email is a fallback, not primary. |
 
 ### Consequences
 
 **Positive:**
 - Direct API, no intermediary cost
-- Supports interactive messages (buttons, lists) — essential for the FSM UX
+- Supports interactive messages (buttons, lists) for customer support
 - Template management directly in Meta Business Manager
 - Well-documented, stable API
 
@@ -235,19 +235,19 @@ Use **Safaricom Daraja API v3** (Lipa na M-Pesa / STK Push).
 
 ### Context
 
-The WhatsApp customer interaction could be powered by an LLM (e.g., GPT-4o) or by a deterministic finite state machine. We need to decide which approach.
+WhatsApp customer support could be powered by an LLM (e.g., GPT-4o) or by a deterministic finite state machine. Website forms handle booking, so the WhatsApp workflow is limited to support and help.
 
 ### Decision
 
-Use a **deterministic finite state machine (FSM)** for all WhatsApp customer interactions.
+Use a **deterministic finite state machine (FSM)** for structured WhatsApp support interactions.
 
 ### Alternatives Considered
 
 | Option | Reason Rejected |
 |---|---|
-| GPT-4o / Claude as booking agent | Per-message API cost (estimated KES 5–15/conversation at current rates) adds up quickly. Non-deterministic: hard to test and debug. Hallucinations could cause incorrect bookings or financial errors. Latency adds 2–5s per message. Compliance risk: LLM may generate responses that violate WhatsApp policies. |
-| Rasa (self-hosted NLU) | Complex to set up and maintain. NLU adds value for open-ended conversations, not for bounded booking flows. |
-| Hybrid (FSM + LLM for fallback) | Added complexity. The FSM handles all required use cases. Human escalation is the appropriate fallback for the rare edge case, not an LLM. |
+| GPT-4o / Claude as support agent | Per-message API cost adds up quickly. Non-deterministic responses are harder to test and audit. Latency and WhatsApp policy compliance also need consideration. |
+| Rasa (self-hosted NLU) | Complex to set up and maintain. The support use cases do not justify a separate NLU platform. |
+| Hybrid (FSM + LLM for fallback) | Added complexity. Human escalation is the fallback for support cases the FSM cannot handle. |
 
 ### Consequences
 
@@ -259,11 +259,11 @@ Use a **deterministic finite state machine (FSM)** for all WhatsApp customer int
 - Easy to extend: add a new state file for new workflows
 
 **Negative:**
-- Cannot handle free-form input (e.g., "Can I book a gel manicure for next Tuesday at 2?")
+- Cannot handle every free-form support question without escalation
 - Numbered-menu UX is less natural than conversational NLU
 - New workflows require developer involvement (no no-code configuration)
 
-**Mitigation:** The numbered-menu UX is well-understood by Kenyan WhatsApp users (widely used by banks, utilities). Human escalation handles the < 5% of conversations that don't fit the workflow.
+**Mitigation:** Keep WhatsApp support menus short and provide a direct link to the website for booking and appointment management. Human escalation handles requests the workflow cannot resolve.
 
 ---
 

@@ -338,7 +338,7 @@ Note the `upsert` with a no-op `update`: this makes `dispatch()` itself safe to 
 
 ## 6. WhatsApp Delivery (client-facing)
 
-Outbound half of the same FSM that handles inbound conversation — architecturally simpler, distinct gotchas.
+Outbound customer messaging for appointment lifecycle events and reminders. Inbound WhatsApp support uses a separate workflow.
 
 - **Session vs template messages.** Within a 24h customer-initiated session, free-form messages are allowed. Outside it, only pre-approved templates work. Booking confirmations sent right after a client messages you can be free-form; a `reminder_24h` sent a day later must use an approved template.
 - **Submit templates ahead of time.** Approval has lead time — budget for it in your rollout schedule, not as a same-day dependency.
@@ -1241,7 +1241,7 @@ async function sendEmailNotification(job: Job<NotificationJobData>) {
 
 **Future expansion plan** (when email becomes more central):
 1. Add email routing rules to the dispatch config — which events fall back to email, and under what conditions (e.g. "WhatsApp delivery failed after 3 retries").
-2. Add email address collection to the WhatsApp conversation flow.
+2. Add email address collection to the website booking flow.
 3. Implement bounce/complaint webhook handling with HMAC verification.
 
 ---

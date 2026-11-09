@@ -23,6 +23,9 @@ const schema = z.object({
     .default("development"),
   // Redis (required for BullMQ + WhatsApp)
   REDIS_URL: z.string().min(1, "REDIS_URL is required"),
+  // Database (required for Prisma)
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  
   // WhatsApp (required for sending messages)
   WHATSAPP_ACCESS_TOKEN: z.string().min(1, "WHATSAPP_ACCESS_TOKEN is required"),
   WHATSAPP_PHONE_NUMBER_ID: z
@@ -32,8 +35,7 @@ const schema = z.object({
   // Owner's personal WhatsApp number (E.164), used as a fallback channel for
   // human-escalation alerts when no active Web Push subscription exists.
   OWNER_WHATSAPP_PHONE: z.string().default(""),
-  // Database (required for Prisma)
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+
   // Daraja / M-Pesa (required for STK push + verification)
   DARAJA_CONSUMER_KEY: z.string().min(1, "DARAJA_CONSUMER_KEY is required"),
   DARAJA_CONSUMER_SECRET: z

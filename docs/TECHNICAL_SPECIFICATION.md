@@ -42,17 +42,17 @@
 
 Nailbook is a three-tier system:
 
-1. **Presentation layer** — WhatsApp Cloud API (customer) and PWA (salon staff/owner)
+1. **Presentation layer** — Customer booking website and staff PWA, with WhatsApp for notifications and support
 2. **Application layer** — Node.js/Express REST API with background job processing via BullMQ
 3. **Data layer** — PostgreSQL (primary store) and Redis (sessions, cache, job queue)
 
-The system is event-driven at its edges: WhatsApp sends webhooks, Daraja sends payment callbacks, and BullMQ drives all async work (reminders, retries, notifications).
+The system is event-driven at its edges: WhatsApp sends support webhooks, Daraja sends payment callbacks, and BullMQ drives all async work (reminders, retries, notifications).
 
 ---
 
 ## Design Principles
 
-1. **Workflow over AI** — The WhatsApp bot uses a deterministic finite state machine. No LLM at runtime. This ensures predictable behaviour, zero per-message AI cost, and easier debugging.
+1. **Workflow over AI** — WhatsApp support uses a deterministic finite state machine. No LLM at runtime. This keeps support responses predictable and easy to debug; website workflows handle booking and payment.
 2. **Queue everything async** — Any operation that touches an external API (WhatsApp, Daraja, Email) is handled by a BullMQ job, not inline in the request handler.
 3. **Idempotency at all edges** — Daraja callbacks, WhatsApp webhook deliveries, and queue jobs are all designed to be processed multiple times safely.
 4. **Schema-first** — Prisma schema is the single source of truth for the data model. Types are generated from it.
@@ -66,6 +66,8 @@ The system is event-driven at its edges: WhatsApp sends webhooks, Daraja sends p
 ## System Context Diagram
 
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for Mermaid diagrams.
+
+Customers use the website for booking and appointment management, and the staff PWA for salon operations. WhatsApp is used for support and outbound notifications; it is not a booking interface.
 
 ```
 ┌─────────────┐     WhatsApp messages      ┌─────────────────────┐
@@ -128,8 +130,8 @@ src/
 | `modules/bookings` | Booking lifecycle: create, approve, cancel, reschedule. Calls slot engine to verify availability before mutating. Emits domain events for downstream processing. |
 | `modules/payments` | Initiates STK Push via Daraja. Handles callbacks. Updates booking payment status. Records all transaction attempts. |
 | `modules/slots` | Computes available slots given business hours, service duration, and existing bookings. Pure function — no side effects. |
-| `modules/webhooks` | Receives and validates incoming webhooks. Parses message content, delegates to the FSM engine. Responds with HTTP 200 immediately (async processing). |
-| `workflows/engine` | Stateless FSM runner. Loads session from Redis. Executes the transition function for the current state + input. Saves updated session to Redis. Sends outbound WhatsApp messages. |
+| `modules/webhooks` | Receives and validates incoming WhatsApp support and Daraja payment webhooks. WhatsApp support messages are delegated to the FSM engine. Responds with HTTP 200 immediately (async processing). |
+| `workflows/engine` | Stateless WhatsApp support FSM runner. Loads session from Redis, handles help and escalation, and directs appointment booking and management to the website. |
 | `jobs/reminders` | BullMQ processor. Queries bookings with upcoming appointments. Sends WhatsApp reminders via the WhatsApp module. Marks reminder as sent in the DB. |
 | `jobs/payments` | BullMQ processor. Calls Daraja STK Push endpoint. Handles retries on failure. |
 
@@ -474,20 +476,15 @@ Jobs that exhaust all retries are moved to a `dead-letter` queue. A daily alert 
 
 ## State Machine Design
 
-See [WHATSAPP_AUTOMATION.md](./WHATSAPP_AUTOMATION.md) for full detail.
+Website forms and API endpoints handle booking, rescheduling, cancellation, and lookup. See [WHATSAPP_AUTOMATION.md](./WHATSAPP_AUTOMATION.md) for the WhatsApp support workflow.
 
 ### Summary of States
 
 ```
-IDLE → GREETING → SERVICE_SELECTION → DATE_SELECTION
-     → TIME_SELECTION → BOOKING_CONFIRMATION
-     → PAYMENT_PENDING → PAYMENT_COMPLETED → IDLE
+IDLE → GREETING → FAQ / SUPPORT → HUMAN_ESCALATION → IDLE
 
-From any state:
-  "cancel" → CANCELLATION_FLOW
-  "reschedule" → RESCHEDULING_FLOW
-  "my appointment" → LOOKUP_FLOW
-  timeout (30m) → IDLE (session cleared)
+Booking and payment are completed on the website. WhatsApp can provide the booking link
+and direct customers to the secure manage-booking page.
 ```
 
 ---

@@ -10,13 +10,13 @@
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING : Customer completes WhatsApp flow\nor staff creates manually
+    [*] --> PENDING : Customer completes website flow\nor staff creates manually
 
     PENDING --> APPROVED : Owner/staff approves
-    PENDING --> CANCELLED : Owner/staff cancels\nor customer cancels via WhatsApp
+    PENDING --> CANCELLED : Owner/staff cancels\nor customer cancels via secure website link
 
     APPROVED --> RESCHEDULED : Owner/staff reschedules
-    APPROVED --> CANCELLED : Owner/staff cancels\nor customer cancels via WhatsApp
+    APPROVED --> CANCELLED : Owner/staff cancels\nor customer cancels via secure website link
     APPROVED --> COMPLETED : Marked complete after appointment time
     APPROVED --> NO_SHOW : Customer does not arrive
 
@@ -31,11 +31,11 @@ stateDiagram-v2
 
 | State | Description | Who can enter this state |
 |---|---|---|
-| `PENDING` | Booking created, awaiting owner approval | System (WhatsApp flow), Staff (manual create) |
+| `PENDING` | Booking created, awaiting owner approval | System (website flow), Staff (manual create) |
 | `APPROVED` | Booking confirmed by owner/staff. Reminders scheduled. | Owner, Staff |
-| `RESCHEDULED` | Booking moved to a new time (status transitions back to APPROVED) | Owner, Staff, Customer (via WhatsApp) |
+| `RESCHEDULED` | Booking moved to a new time (status transitions back to APPROVED) | Owner, Staff, Customer (via secure website link) |
 | `COMPLETED` | Appointment has occurred. Set automatically by a scheduled job. | System (job), Owner |
-| `CANCELLED` | Booking cancelled. Slot released. | Owner, Staff, Customer (via WhatsApp) |
+| `CANCELLED` | Booking cancelled. Slot released. | Owner, Staff, Customer (via secure website link) |
 | `NO_SHOW` | Customer did not appear. Set manually by staff. | Owner, Staff |
 
 ### Valid Transitions
@@ -64,7 +64,7 @@ PAYMENT_FAILED → M-Pesa callback failed (ResultCode ≠ 0) or timed out
 REFUNDED      → manual refund issued by owner
 ```
 
-A booking can be APPROVED with UNPAID payment status — the owner controls this. The WhatsApp flow requests payment immediately, but in-person cash is also allowed (owner marks as PAID manually).
+A booking can be APPROVED with UNPAID payment status — the owner controls this. The website flow requests the configured deposit after submission, but in-person cash is also allowed (owner marks as PAID manually).
 
 ---
 

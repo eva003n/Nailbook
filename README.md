@@ -1,8 +1,8 @@
-# Nailbook — Nail Salon Booking & WhatsApp Automation Platform
+# Nailbook — Nail Salon Website Booking & WhatsApp Notifications
 
 ## Product Vision
 
-Nailbook is a booking management platform purpose-built for a Kenyan nail salon. Customers book, pay, and receive reminders entirely through WhatsApp. Salon owners and staff manage the business through a Progressive Web App (PWA). Payments run on M-Pesa Daraja API v3.
+Nailbook is a booking management platform purpose-built for a Kenyan nail salon. Customers book appointments on the salon website, pay via M-Pesa, and receive confirmations and reminders through WhatsApp. Salon owners and staff manage the business through a Progressive Web App (PWA). Payments run on M-Pesa Daraja API v3.
 
 The system is designed to eliminate missed appointments, reduce manual scheduling effort, improve the client payment experience, and give the salon owner full visibility into revenue and capacity — all without requiring customers to download an app or learn a new interface.
 
@@ -13,7 +13,7 @@ The system is designed to eliminate missed appointments, reduce manual schedulin
 | Objective | Target |
 |---|---|
 | Reduce no-shows | ≥ 40% reduction within 90 days |
-| Increase booking completion rate | ≥ 85% of initiated conversations |
+| Increase booking completion rate | ≥ 85% of website booking starts |
 | Eliminate manual scheduling | 100% of bookings through the platform |
 | Payment collection at booking | ≥ 90% M-Pesa payment rate |
 | Reminder delivery rate | ≥ 98% |
@@ -22,13 +22,14 @@ The system is designed to eliminate missed appointments, reduce manual schedulin
 
 ## Core Features
 
-### Customer-Facing (WhatsApp)
-- Conversational booking flow (service → date → time → confirm)
-- M-Pesa STK Push payment at booking confirmation
-- AI fallback layer (Gemini 2.0 Flash) for FAQs and edge cases the FSM cannot handle
-- Automated appointment reminders (24h and 1h before)
-- Rescheduling and cancellation through WhatsApp
-- Appointment lookup ("What's my next booking?")
+### Customer-Facing (Website)
+- Mobile-friendly booking flow (service and add-ons → technician preference → date → time → customer details → confirm)
+- Clear price and appointment summary before submission
+- M-Pesa STK Push deposit at booking confirmation
+- Booking reference and status shown after submission
+- Rescheduling, cancellation, and appointment lookup from a secure booking link
+- WhatsApp confirmations, status updates, and automated reminders (24h and 1h before)
+- WhatsApp support for questions and help with booking
 
 ### Salon Owner / Staff (PWA)
 - Installable on any device — iOS, Android, or desktop — no App Store required
@@ -49,30 +50,18 @@ The system is designed to eliminate missed appointments, reduce manual schedulin
 ## System Architecture Summary
 
 ```
-Customer (WhatsApp)
-        │
-        ▼
-WhatsApp Cloud API
-        │
-        ▼
-Backend API (Node.js / Express)
-        │         │
-        │    Gemini 2.0 Flash (AI fallback — free tier)
-        │
-   ┌────┴────┐
-   │         │
-PostgreSQL  Redis (sessions + cache)
-   │         │
-   └────┬────┘
-        │
-      BullMQ (job queues)
-        │
-   ┌────┴──────────────┐
-   │                   │
-M-Pesa Daraja API   Notification Services
-                    (WhatsApp / Email)
-
-PWA (React / Vite) ──────► Backend API (REST + SSE)
+Customer website and staff PWA (React / Vite)
+                    │
+                    ▼
+          Backend API (REST + SSE)
+            │       │       │
+            ▼       ▼       ▼
+      PostgreSQL   Redis   M-Pesa Daraja API
+                    │
+                 BullMQ
+                    │
+       WhatsApp / Email notifications
+       WhatsApp support + AI fallback
 ```
 
 Full diagrams in [ARCHITECTURE.md](docs/ARCHITECTURE.md).

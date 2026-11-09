@@ -1,3 +1,154 @@
+## Nail services
+Manicures
+Pedicures
+Gel polish
+Acrylic extensions
+Gel extensions
+Nail art
+Nail repair
+Soak-off services
+Paraffin treatments
+Hand and foot treatments
+
+### Manage Appointments and Walk-In Customers Together
+Many Kenyan nail salons serve both appointments and walk-in customers. Managing the two groups using a notebook can create confusion, especially during weekends, holidays and other busy periods.
+
+Helps the team record scheduled appointments while maintaining visibility over customers who arrive without bookings.
+
+An organised process helps receptionists:
+
+Confirm scheduled customers
+Record new walk-ins
+Assign available technicians
+Estimate customer waiting times
+Monitor services in progress
+Complete checkout after the service
+This creates a smoother experience for customers and employees.
+### Nail Technician Scheduling
+Different technicians may have different skills, working hours and days off. Some may specialise in acrylic extensions, while others focus on nail art, gel polish or pedicures.
+
+Nail Salon Booking Software Kenya helps managers organise employee schedules and assign services to the appropriate technicians.
+
+Managers can use employee information to monitor:
+
+Technician availability
+Customers served
+Services completed
+Product sales
+Revenue generated
+Commission earned
+Better visibility helps the salon distribute work fairly and identify when additional technicians may be required.
+
+
+### M-Pesa and Payment Management
+Cash and M-Pesa are common payment methods in Kenyan nail salons.
+
+Helps the salon connect a completed service with the corresponding payment record. The business can record supported payment methods and review daily totals.
+
+This makes it easier to answer questions such as:
+
+Which services were paid for?
+How much was collected through M-Pesa?
+How much cash was received?
+Which technician completed the service?
+Were any discounts applied?
+Does the recorded income match the day’s services?
+Organised payment records help reduce missing transactions and improve accountability.
+### Point of Sale for Nail Services and Products
+Modern nail studios often earn income from services and retail products. A suitable point-of-sale system should handle both areas.
+
+Prim allows the business to record services and products during checkout. Products may include:
+
+Nail polish
+Cuticle oil
+Hand cream
+Nail care kits
+Press-on nails
+Nail files
+Strengthening treatments
+Beauty accessories
+A connected POS system helps update sales reports while maintaining more accurate product records.
+
+
+### Customer Records and Service History
+Remembering every customer’s nail preferences can be difficult, especially when the business serves many people.
+
+Maintain customer profiles containing useful information such as:
+
+Contact details
+Previous appointments
+Services received
+Preferred technician
+Purchase history
+Visit frequency
+Relevant customer notes
+When a customer returns, the team can review their history and provide a more personalised experience.
+
+For example, a technician may see that the customer normally chooses a particular nail shape, colour or service package. This attention to detail can strengthen customer loyalty.
+
+### Reduce Missed Appointments
+Missed appointments leave technicians idle and reduce the salon’s potential income. Proper booking records and appointment reminders can help customers remember their scheduled visits.
+
+Nail salons can also introduce clear booking policies, including:
+
+- Appointment confirmation
+- Cancellation deadlines
+- Rescheduling procedures
+- Deposit requirements
+- Late-arrival policies
+
+### Manage Nail Products and Inventory
+Nail salons use numerous products during daily services. Without proper inventory records, products can run out unexpectedly or disappear without explanation.
+
+Helps businesses track items such as:
+
+Gel polish
+Acrylic powder
+Nail tips
+Nail glue
+Monomer
+Base coats
+Top coats
+Nail files
+Buffers
+Acetone
+Cotton pads
+Cuticle products
+Disposable supplies
+
+Better inventory visibility helps managers identify fast-moving products, low-stock items and products that may need to be reordered.
+
+### Calculate Nail Technician Commissions
+Many nail salons compensate technicians using a salary, commission or a combination of both. Manual commission calculations can cause errors and disagreements.
+
+Prim connects recorded services and product sales with employee activity. This gives the manager clearer information when preparing commissions.
+
+The owner can review:
+
+Services completed by each technician
+Revenue generated
+Products sold
+Applicable commission
+Performance over a selected period
+Transparent records build trust between management and employees.
+
+### Reports for Nail Salon Owners
+A busy salon can appear successful while still experiencing revenue leakage, high expenses or poor stock control. Reports help owners understand what is happening behind daily activity.
+
+Provides business information that can help you monitor:
+
+Daily sales
+Weekly and monthly performance
+Popular nail services
+Product sales
+Customer activity
+Employee performance
+Commission records
+Payment totals
+Inventory movement
+Branch performance
+These reports help owners make decisions using recorded information instead of assumptions.
+
 ## FSM Engine
 - [XState Finite State Machines Guide](https://stately.ai/docs/machines)
 - [Conversation State Machines Explained](https://www.freecodecamp.org/news/how-to-build-chatbots-with-state-machines)
@@ -12,11 +163,41 @@
 - https://solyarisoftware.medium.com/dialoghi-come-macchine-a-stati-41bb748fd5b0
 - https://www.zoho.com/fsm/whatsapp.html
 
+## Problem
+- **No remainders** - which increases the rate of no shows
+- **No deposits** - no collection of deposits during booking to acoid the high friction of a separate Mpesa request and confirming payment
+- **Double bookings** assigning two clients the same slot 
+- **Admin time** managing bookings, calls via whatsapp
+## Requirements
+- Each technician should have their own calendar, since each has different skills
+- Enable multiservice booking for clients
+- Collect Mpesa deposit to cut down on no shows, making the client to commit before arrival preventing slot loss and technicians being idle
+
+- Automated appointment reminders via SMS, WhatsApp or email
+- Prevent double bookings
+- Visibility into technicians schedules, to no which one is free
+- Support add on services attach to core services during booking like nail art per finger, French tips, gel top coat, extra-length extensions.
+- Slot length must adjust automatically to account for extra time
+- Client sees the full price before they arrive: no surprises, no under-quoting by a technician trying to be accommodating.
+- Reports, for example show which technicians and services are in high demand
+- Shareable website booking link for Instagram bio, WhatsApp status, or the salon website; no app needed
+- Clients pick a preferred technician or next available slot  
+
+
+## References
+- [Online nail booking system](https://webpinnpos.com/blog/nail-salon-booking-system-kenya)
+- [Collecting Booking Deposits via M-Pesa in Kenya](https://webpinnpos.com/blog/mpesa-deposit-booking-kenya)
+
+
 ## Chatbots
 -[Whatsapp chatbot by infobip](https://www.infobip.com/blog/whatsapp-chatbot-quick-guide)
 
+
+## Related systems
+- [Prim]()
+- []
 ## Whatsapp automation
-To automate WhatsApp for your business, you can either use the built-in features on the WhatsApp Business App for simple tasks, or integrate the WhatsApp Business API via Meta with third-party tools (like ManyChat, Zapier, or AI builders) or directly for full sales, booking, and support automation
+Businesses can automate WhatsApp using built-in WhatsApp Business App features or the WhatsApp Business API with third-party tools or direct integrations. Nailbook uses WhatsApp for customer support and appointment messages; clients complete booking and appointment management on the website.
 
 ### Method 1: Basic Automation (For Small Teams & Local Stores)
 You can manage basic replies natively using the free WhatsApp Business App.

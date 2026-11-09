@@ -548,9 +548,9 @@ Returns a paginated, filterable list of bookings.
 
 ### POST /bookings
 
-Creates a new booking (manual creation from the PWA).
+Creates a customer booking from the website or a staff-created booking from the PWA.
 
-**Authorization:** Bearer JWT (any role)  
+**Authorization:** Customer website requests use the public, rate-limited booking flow; staff requests require a Bearer JWT.
 **Idempotency-Key:** Supported
 
 **Request:**
@@ -610,7 +610,7 @@ Returns a single booking with full relations.
         "toStatus": "PENDING",
         "actorType": "SYSTEM",
         "actorId": null,
-        "reason": "Created via WhatsApp",
+        "reason": "Created via website",
         "createdAt": "2026-06-04T08:32:11.000Z"
       },
       {
@@ -967,7 +967,7 @@ Returns a paginated, searchable customer list.
 
 ### POST /customers
 
-Creates a customer record manually (PWA). Customers are also auto-created by the WhatsApp FSM on first contact.
+Creates a customer record manually (PWA). Customers are also created when they submit their first website booking.
 
 **Authorization:** Bearer JWT (any role)
 
@@ -1167,7 +1167,7 @@ Soft-deletes a service.
 
 ### GET /slots/availability
 
-Returns available time slots for a given service and date. Used by both the PWA calendar and the WhatsApp FSM internally.
+Returns available time slots for a given service and date. Used by the customer booking website and the staff PWA calendar.
 
 **Authorization:** Bearer JWT (any role)
 
@@ -1243,7 +1243,7 @@ GET /api/v1/events?token=<accessToken>
 
 | Event | Payload | When |
 |---|---|---|
-| `booking.created` | `{ bookingId, customerName, service, appointmentAt }` | New WhatsApp booking created |
+| `booking.created` | `{ bookingId, customerName, service, appointmentAt }` | New customer booking created from the website or staff PWA |
 | `booking.approved` | `{ bookingId }` | Booking approved |
 | `booking.cancelled` | `{ bookingId }` | Booking cancelled |
 | `booking.rescheduled` | `{ bookingId, newAppointmentAt }` | Booking rescheduled |

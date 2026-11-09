@@ -330,7 +330,7 @@ Sidebar navigation replaces bottom bar on wider screens. Same 5 items, with labe
 - Swipe left (mobile) → inline action buttons
 - Search input → client-side filter with 300ms debounce; falls back to API search for All tab
 
-**Empty State:** "No bookings found. Customers book via WhatsApp."
+**Empty State:** "No bookings found. Share the website booking link with clients to get started."
 
 ---
 
@@ -534,7 +534,7 @@ Bookings tab → Click [+ New] → /bookings/new
 |---|---|---|---|
 | Dashboard (no bookings today) | `CalendarX` | "No appointments today" | — |
 | Bookings list (no results) | `Calendar` | "No bookings found" | "+ New Booking" |
-| Customers (none yet) | `Users` | "No customers yet — they appear after their first WhatsApp booking" | — |
+| Customers (none yet) | `Users` | "No customers yet — they appear after their first website booking" | — |
 | Payments (no transactions) | `CreditCard` | "No transactions in this period" | — |
 | Customer booking history | `Clock` | "No past bookings" | — |
 

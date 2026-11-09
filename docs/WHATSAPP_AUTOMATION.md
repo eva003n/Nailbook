@@ -6,10 +6,12 @@
 
 ## Overview
 
-The WhatsApp chatbot uses a **deterministic FSM architecture** that handles structured booking flows with strict validation at every boundary. Invalid input is managed through an escalation ladder that transitions to human support after repeated failures.
+WhatsApp is used for appointment confirmations, reminders, and customer support. Customers create, pay, view, reschedule, and cancel appointments on the website. The WhatsApp FSM does not create or modify bookings; it answers support questions and directs customers to the relevant website page.
+
+> **Current scope:** The booking-specific FSM examples later in this document describe the previous WhatsApp booking design and are deprecated. Use [PRODUCT_REQUIREMENTS.md](./PRODUCT_REQUIREMENTS.md), [BOOKING_WORKFLOW.md](./BOOKING_WORKFLOW.md), and [UI_UX_SPECIFICATION.md](./UI_UX_SPECIFICATION.md) for the current website booking flow.
 
 **Key Principles:**
-- Deterministic: Booking flows behave identically every time
+- Deterministic: support and escalation flows behave consistently
 - Zero cost per message for the structured majority
 - Fail-fast validation at every system boundary
 - Transactional state transitions (only commit state after successful outbound delivery)
@@ -17,46 +19,44 @@ The WhatsApp chatbot uses a **deterministic FSM architecture** that handles stru
 
 ---
 ## Customer journey
-### Identify every customer goal
-This become the top level intents. This is the conversation entrypoint
+### WhatsApp support intents
+These are the WhatsApp support entry points. Booking actions open the website.
 ```
 Customer
 
-├── Book an appointment
-├── Reschedule appointment
-├── Cancel appointment
-├── View upcoming appointment
+├── Open website to book an appointment
+├── Open secure website link to manage an appointment
 ├── Browse services
 ├── Get pricing
 ├── Ask business questions(location, business hours, contacts)
 ├── Ask open ended questions
 ├── Talk to a human agent
-├── Pay for booking
+├── Open website to pay a booking deposit
 └── Leave feedback
 ```
-#### Booking flow
+#### Website booking flow (outside WhatsApp)
 ```
 Customer
 
 ↓
 
-Wants appointment
+Opens website booking page
 
 ↓
 
-Select service or services
+Selects services and add-ons
 
 ↓
 
-Select preferred day
+Chooses technician preference and date
 
 ↓
 
-Select preferred time period
+Selects an available time
 
 ↓
 
-Recommend slots
+Confirms appointment details and pays deposit
 
 ↓
 

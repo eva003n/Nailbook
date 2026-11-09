@@ -234,21 +234,15 @@ The salon owner is the Data Controller. Registration with the Office of the Data
 
 ### Consent Management
 
-Consent is captured at first interaction in the WhatsApp flow:
+Consent to appointment-related WhatsApp notifications is captured during website booking:
 
 ```
-Welcome to Nailbook! 👋
-
-By continuing, you agree that we may:
-• Store your name and phone number to manage your bookings
-• Send you appointment reminders and updates
-
-Reply YES to continue or STOP to opt out.
+During website booking, customers provide their name and phone number so the salon can manage the appointment. They can separately choose whether to receive appointment updates on WhatsApp and may opt out of non-essential messages at any time.
 ```
 
 Consent is recorded in `customers.consent_given` and `customers.consent_at`.
 
-**Opt-out:** Customer replies "STOP" at any time. System:
+**Opt-out:** Customer can reply "STOP" to WhatsApp messages or change notification preferences through the website. System:
 
 1. Sets `consent_given = false`
 2. Removes all scheduled reminder jobs

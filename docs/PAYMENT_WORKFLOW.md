@@ -8,7 +8,7 @@
 
 ## Overview
 
-Payments in Nailbook are initiated via M-Pesa STK Push after a customer confirms their booking in the WhatsApp flow. The customer receives a payment prompt on their phone, enters their M-Pesa PIN, and the result is delivered asynchronously to the backend via a Daraja callback.
+Payments in Nailbook are initiated via M-Pesa STK Push after a customer submits a booking on the website. The customer receives a payment prompt on their phone, enters their M-Pesa PIN, and the result is delivered asynchronously to the backend via a Daraja callback.
 
 All payment initiation is handled asynchronously via BullMQ for async/retry-safe processing, and an admin PWA for visibility and reconciliation.
 
@@ -40,7 +40,7 @@ This document describes the **system as it should behave in production** — cor
 A payment system fails quietly if you let it. Three rules drive every decision below:
 
 - **The callback is the source of truth, not the STK push response.** Daraja's synchronous STK push response only confirms the _prompt was sent_ — it says nothing about whether the customer paid. Never mark a booking as paid from that response.
-- **Every write that can be retried, will be retried — by Safaricom, by your own queue, by a customer double-tapping a WhatsApp button.** Every payment-mutating operation must be idempotent.
+- **Every write that can be retried, will be retried — by Safaricom, by your own queue, or by a customer retrying from the website.** Every payment-mutating operation must be idempotent.
 - **Money state and booking state are separate state machines that must stay reconciled, not merged.** A booking can be `CONFIRMED` while a payment is `PENDING` (cash on arrival) — don't conflate "booking confirmed" with "payment received."
 
 ---
@@ -70,19 +70,19 @@ stateDiagram-v2
 ```mermaid
 sequenceDiagram
     participant Customer as Customer (Phone)
-    participant Bot as WhatsApp Bot
+    participant Web as Booking Website
     participant API as Nailbook API
     participant Queue as BullMQ
     participant DB as PostgreSQL
     participant Daraja as Daraja M-Pesa
 
-    Bot->>Customer: "Enter your M-Pesa number"
-    Customer->>Bot: "0712345678"
-    Bot->>API: Trigger STK Push (bookingId, phone)
+    Web->>Customer: Request M-Pesa phone number and deposit confirmation
+    Customer->>Web: Confirms phone and deposit
+    Web->>API: Trigger STK Push (bookingId, phone)
     API->>DB: Create Payment record (status=PENDING)
     API->>Queue: Enqueue stk-push job
-    API->>Bot: Return (async - job queued)
-    Bot->>Customer: "Payment request sent. Check your phone."
+    API->>Web: Return (async - job queued)
+    Web->>Customer: Show payment request status
 
     Queue->>API: Process stk-push job
     API->>API: Generate timestamp + password
@@ -99,14 +99,14 @@ sequenceDiagram
         API->>DB: UPDATE Payment (status=SUCCESS, receipt)
         API->>DB: UPDATE Booking (paymentStatus=SUCCESS)
         API->>Queue: Enqueue WhatsApp confirmation message
-        Queue->>Bot: Send "Payment received ✅"
-        Bot->>Customer: Confirmation message
+        Queue->>WhatsApp: Send payment confirmation
+        WhatsApp->>Customer: Confirmation message
     else Customer cancels / timeout (ResultCode=1032)
         Daraja->>API: POST /payments/mpesa-callback\n{ResultCode: 1032}
         API->>DB: INSERT PaymentTransaction (FAILED)
         API->>DB: UPDATE Payment (status=CANCELLED)
-        API->>Queue: Enqueue WhatsApp failure + retry offer
-        Bot->>Customer: "Payment wasn't completed. Retry?"
+        API->>Queue: Enqueue payment status notification
+        API->>Web: Make retry option available on booking page
     end
 ```
 
@@ -391,7 +391,7 @@ lock while waiting on an external API.
 
 ## 6. Timeout & Retry Strategy (BullMQ)
 
-Not every STK push gets a callback. Customers close WhatsApp, lock their phone before entering their PIN, or lose signal. You need a deterministic way to give up.
+Not every STK push gets a callback. Customers close the website, lock their phone before entering their PIN, or lose signal. You need a deterministic way to give up.
 
 ### Timeout Scheduling
 Daraja's own STK prompt expires ~60-90s on the handset
@@ -420,11 +420,8 @@ Worker dequeues job
 Daraja callback arrives (ResultCode 1032)
 → Mark PaymentTransaction FAILED
 → Mark Payment CANCELLED
-→ Notify customer via WhatsApp:
-  "It looks like the payment wasn't completed.
-   Would you like to try again?
-   1. Retry payment
-   2. Cancel booking"
+→ Update the website booking page with the failed payment status and retry option
+→ Send a WhatsApp notification directing the customer to the secure booking page
 ```
 
 #### Path C: Callback never arrives
@@ -440,7 +437,7 @@ Background job runs every 10 minutes
 
 ### Retry Path
 
-When a customer chooses to retry payment (via WhatsApp):
+When a customer chooses to retry payment (from the website):
 
 ```
 1. Verify booking is still APPROVED

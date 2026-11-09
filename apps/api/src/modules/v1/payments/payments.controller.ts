@@ -4,28 +4,43 @@ import { paymentsService } from "./payments.service.js";
 import { success, paginated } from "../../../shared/utils/response.js";
 import { parsePagination } from "../../../shared/utils/pagination.js";
 import { asyncHandler } from "../../../shared/utils/asyncHandler.js";
+import { ValidationError } from "../../../shared/types/errors.js";
+import { redis } from "../../../shared/lib/redis.js";
 
 // --- Validation schemas (exported for use in routes) ---
 
 export const stkPushSchema = z.object({
   bookingId: z.string().uuid(),
-  phoneNumber: z
-    .string()
-    .regex(/^254[17]\d{8}$/, "Invalid Kenyan phone number"),
+  phoneNumber: z.string().regex(/^254[17]\d{8}$/, "Invalid Kenyan phone number"),
 });
 
 // --- Handlers ---
 
 export const initiateStkPush = asyncHandler(
-  async (req: Request, res: Response, _next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const input = req.validated!.body as z.infer<typeof stkPushSchema>;
     const userId = req.user.userId;
+    const dedupKey = req.get("idempotency-key");
+
+    if (!dedupKey) {
+      return next(new ValidationError("Missing 'Idempotency-Key` header"));
+    }
+
+    const DEDUP_KEY_PREFIX = `cache:${dedupKey}`;
+    // check if dedup key exists in redis and send previous response
+    const previousResponse = await redis.get(DEDUP_KEY_PREFIX);
+    if (previousResponse) {
+      return success(res, JSON.parse(previousResponse), 202);
+    }
+
     const result = await paymentsService.initiateStkPush(
       input.bookingId,
       input.phoneNumber,
-      userId
+      userId,
     );
 
+    await redis.setex(DEDUP_KEY_PREFIX, 86_400, JSON.stringify(result));// expire after a day
+    res.set("Location", `/api/v1/payments/${result.paymentId}`);
     success(res, result, 202);
   },
 );
@@ -36,13 +51,12 @@ export const paymentQuerySchema = z.object({
   to: z.string().optional(),
   customerId: z.string().optional(),
   sort: z.string().optional(),
-})
+});
 export const listPayments = asyncHandler(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { page, limit, sort } = parsePagination(
-      req.query as Record<string, unknown>,
-      { sort: "createdAt:desc" },
-    );
+    const { page, limit, sort } = parsePagination(req.query as Record<string, unknown>, {
+      sort: "createdAt:desc",
+    });
     const result = await paymentsService.list({
       page,
       limit,
@@ -64,7 +78,7 @@ export const listPayments = asyncHandler(
 
 export const paymentParamSchema = z.object({
   id: z.string().uuid(),
-})
+});
 export const getPaymentById = asyncHandler(
   async (req: Request, res: Response, _next: NextFunction) => {
     const params = req.validated?.params as z.infer<typeof paymentParamSchema>;

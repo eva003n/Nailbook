@@ -10,17 +10,18 @@
 C4Context
     title System Context for Nailbook
 
-    Person(customer, "Customer", "Kenyan nail salon customer. Books and pays via WhatsApp.")
+    Person(customer, "Customer", "Kenyan nail salon customer. Books on the website and pays via M-Pesa.")
     Person(owner, "Salon Owner", "Manages appointments and business using PWA.")
     Person(staff, "Salon Staff", "Views schedule and manages daily bookings using PWA.")
 
-    System(wannys, "Nailbook Platform", "Booking management, WhatsApp automation, and M-Pesa payments.")
+    System(wannys, "Nailbook Platform", "Website booking, salon management, WhatsApp notifications, and M-Pesa payments.")
 
     System_Ext(whatsapp, "WhatsApp Cloud API", "Meta's messaging API. Receives and sends WhatsApp messages.")
     System_Ext(daraja, "Daraja M-Pesa API", "Safaricom's payment API. Processes STK Push payments.")
     System_Ext(email, "Resend Email", "Email notifications.")
 
-    Rel(customer, whatsapp, "Books appointments, pays, receives reminders", "WhatsApp")
+    Rel(customer, wannys, "Books appointments and manages bookings", "Website")
+    Rel(customer, whatsapp, "Receives confirmations and reminders; asks for support", "WhatsApp")
     Rel(owner, wannys, "Manages bookings, views reports", "PWA")
     Rel(staff, wannys, "Views schedule, handles requests", "PWA")
     Rel(whatsapp, wannys, "Delivers incoming messages", "HTTPS Webhook")
@@ -38,10 +39,10 @@ C4Context
 C4Container
     title Container Diagram — Nailbook
 
-    Person(customer, "Customer", "WhatsApp user")
+    Person(customer, "Customer", "Website booking user; receives WhatsApp notifications")
     Person(owner, "Salon Owner / Staff", "PWA user")
 
-    Container(web, "PWA", "React / Vite / vite-plugin-pwa", "Progressive web app for salon management. Installable on any device. Displays bookings, payments, customer data.")
+    Container(web, "Website and Staff PWA", "React / Vite / vite-plugin-pwa", "Customer booking and booking management website, plus installable salon management PWA.")
     Container(api, "Backend API", "Node.js / Express / TypeScript", "REST API. Handles business logic, authentication, booking engine, payment workflows.")
     Container(worker, "Background Worker", "BullMQ / Node.js", "Processes async jobs: reminders, STK Push, notifications.")
     ContainerDb(postgres, "PostgreSQL", "Relational Database", "Primary data store: bookings, customers, payments, audit logs.")
@@ -51,7 +52,8 @@ C4Container
     System_Ext(daraja, "Daraja M-Pesa API")
     System_Ext(email, "Resend Email")
 
-    Rel(customer, whatsapp, "Sends/receives messages")
+    Rel(customer, web, "Books and manages appointments", "HTTPS")
+    Rel(customer, whatsapp, "Receives confirmations/reminders and gets support")
     Rel(owner, web, "Uses", "Browser / Installed PWA")
     Rel(web, api, "REST API calls", "HTTPS/JSON")
     Rel(web, api, "Real-time updates", "WebSocket / SSE")
@@ -103,7 +105,7 @@ C4Component
     Rel(paymentMod, sseHandler, "Emits payment events")
     Rel(webhookMod, fsmEngine, "Delegates message processing")
     Rel(fsmEngine, redis, "Loads/saves conversation session")
-    Rel(fsmEngine, bookingMod, "Creates bookings")
+    Rel(fsmEngine, bookingMod, "Provides booking help; directs customers to the website")
     Rel(fsmEngine, whatsapp, "Sends outbound messages")
     Rel(notifMod, redis, "Enqueues notification jobs")
     Rel(sseHandler, web, "Streams events", "SSE")
@@ -111,54 +113,31 @@ C4Component
 
 ---
 
-## Sequence Diagram: Booking Creation (WhatsApp)
+## Sequence Diagram: Booking Creation (Website)
 
 ```mermaid
 sequenceDiagram
     actor Customer
-    participant WA as WhatsApp Cloud API
+    participant Web as Booking Website
     participant API as Nailbook API
-    participant FSM as WhatsApp FSM
-    participant Redis
     participant DB as PostgreSQL
     participant Queue as BullMQ
+    participant Daraja as Daraja M-Pesa
+    participant WhatsApp as WhatsApp Cloud API
 
-    Customer->>WA: "Hi" (initiates chat)
-    WA->>API: POST /webhooks/whatsapp (message)
-    API->>API: Validate Meta signature
-    API->>FSM: Process message (phone, "Hi")
-    FSM->>Redis: Load session (MISS → new session, state=IDLE)
-    FSM->>Redis: Save session (state=GREETING)
-    FSM->>WA: Send greeting + menu options
-    WA->>Customer: Greeting message
-
-    Customer->>WA: "1" (Book appointment)
-    WA->>API: POST /webhooks/whatsapp
-    API->>FSM: Process ("1")
-    FSM->>Redis: Load session (state=GREETING)
-    FSM->>DB: Fetch services list
-    FSM->>Redis: Save session (state=SERVICE_SELECTION)
-    FSM->>WA: Send service list
-    WA->>Customer: Service options
-
-    Note over Customer,Queue: Customer selects service, date, time (omitted for brevity)
-
-    Customer->>WA: "YES" (confirms booking)
-    WA->>API: POST /webhooks/whatsapp
-    API->>FSM: Process ("YES")
-    FSM->>DB: Create booking (status=PENDING)
-    FSM->>Queue: Enqueue approval notification job
-    FSM->>Redis: Save session (state=PAYMENT_PENDING)
-    FSM->>WA: Ask for M-Pesa number
-    WA->>Customer: "What M-Pesa number?"
-
-    Customer->>WA: "0712345678"
-    WA->>API: POST /webhooks/whatsapp
-    API->>FSM: Process phone number
-    FSM->>Queue: Enqueue STK Push job
-    FSM->>Redis: Save session (state=AWAITING_PAYMENT)
-    FSM->>WA: "Payment request sent — check your phone"
-    WA->>Customer: Payment prompt message
+    Customer->>Web: Select services, add-ons, technician, date, and time
+    Web->>API: GET services and available slots
+    API->>DB: Read services, availability, and bookings
+    API-->>Web: Service catalogue and available slots
+    Customer->>Web: Enter contact details and confirm booking
+    Web->>API: POST /bookings
+    API->>DB: Validate slot and create PENDING booking
+    API->>Queue: Enqueue approval and WhatsApp confirmation jobs
+    API-->>Web: Booking reference and status
+    Web-->>Customer: Show booking confirmation and payment step
+    Customer->>Web: Confirm M-Pesa phone number and deposit
+    Web->>API: POST /payments/stk-push
+    API->>Queue: Enqueue STK Push job
 
     Queue->>API: Process STK Push job
     API->>+Daraja: POST /stkpush/v3/processrequest
@@ -167,9 +146,9 @@ sequenceDiagram
     Customer->>Daraja: Enters M-Pesa PIN
     Daraja->>API: POST /payments/mpesa-callback
     API->>DB: Update payment (COMPLETED) + booking (PAYMENT_COMPLETED)
-    API->>Queue: Enqueue confirmation WhatsApp message
-    Queue->>WA: Send payment confirmation message
-    WA->>Customer: "Payment received! ✅ Booking confirmed."
+    API->>Queue: Enqueue payment confirmation WhatsApp message
+    Queue->>WhatsApp: Send payment confirmation
+    WhatsApp->>Customer: Payment and appointment status
 ```
 
 ---
@@ -194,7 +173,7 @@ sequenceDiagram
     PWA->>SSE: Open SSE stream (GET /events)
     PWA->>Owner: Displays pending bookings with badge
 
-    Note over SSE,PWA: New booking arrives via WhatsApp
+    Note over SSE,PWA: New booking arrives from the website
     SSE->>PWA: event: booking.created {bookingId, customer, service}
     PWA->>Owner: Badge increments, toast notification shown
 
@@ -251,7 +230,8 @@ sequenceDiagram
         API->>Queue: Enqueue WhatsApp confirmation
     else Payment Failed (ResultCode≠0)
         API->>DB: UPDATE payment_transaction SET status=FAILED, failureReason
-        API->>Queue: Enqueue WhatsApp failure message + retry offer
+        API->>Queue: Enqueue payment status notification
+        API-->>Customer: Website offers payment retry
     end
 ```
 
