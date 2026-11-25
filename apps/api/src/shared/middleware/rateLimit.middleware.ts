@@ -96,6 +96,47 @@ export const stkPushRateLimit = rateLimit({
 });
 
 /**
+ * Public website rate limiter: 60 requests per 15 minutes per IP
+ * (services, availability and booking-status lookups).
+ */
+export const publicRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: true,
+  store: rateLimitStore("public"),
+  keyGenerator: ipKey("public"),
+  message: {
+    error: {
+      code: "RATE_LIMITED",
+      message: "Too many requests. Please wait before retrying.",
+      details: { retryAfterSeconds: 60 },
+    },
+  },
+  logger: rateLimitLogger,
+});
+
+/**
+ * Public booking creation: 5 bookings per hour per IP, to stop slot squatting.
+ */
+export const publicBookingRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: true,
+  store: rateLimitStore("public-booking"),
+  keyGenerator: ipKey("public-booking"),
+  message: {
+    error: {
+      code: "RATE_LIMITED",
+      message: "Too many booking attempts. Please try again later or message us on WhatsApp.",
+      details: { retryAfterSeconds: 3600 },
+    },
+  },
+  logger: rateLimitLogger,
+});
+
+/**
  * WhatsApp webhook rate limiter: 500 requests per minute.
  */
 export const webhookRateLimit = rateLimit({

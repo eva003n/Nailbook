@@ -320,7 +320,7 @@ export function mapPriorityToUrgency(
 }
 
 function getBookingUrl(bookingId: string): string {
-  return `/bookings/${bookingId}`;
+  return `/admin/bookings/${bookingId}`;
 }
 
 /** Strips the endpoint down to origin + short hash so logs don't leak full push URLs. */

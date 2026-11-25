@@ -12,6 +12,7 @@ import { notificationsRoutes } from "./notifications/notifications.routes.js";
 import { pushSubscriptionsRoutes } from "./push-subscriptions/push-subscriptions.routes.js";
 import { businessHoursRoutes } from "./business-hours/business-hours.routes.js";
 import { eventsRoutes } from "./events/events.routes.js";
+import { publicRoutes } from "./public/public.routes.js";
 
 const router: ReturnType<typeof Router> = Router();
 
@@ -20,6 +21,9 @@ router.use("/health", healthRoutes);
 
 // Webhook endpoints (public, no JWT, use HMAC/IP validation)
 router.use("/webhooks", webhooksRoutes);
+
+// Customer website endpoints (public, rate-limited, reference + phone checks)
+router.use("/public", publicRoutes);
 
 // API routes (authenticated)
 router.use("/auth", authRoutes);

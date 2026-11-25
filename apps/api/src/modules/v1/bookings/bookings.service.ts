@@ -68,6 +68,8 @@ interface CreateBookingInput {
   appointmentAt: string;
   notes?: string | undefined;
   stylist: string | undefined;
+  /** Who created the booking: staff (default) or the customer via the public website. */
+  actorType?: ActorType;
 }
 
 const BOOKING_INCLUDE = {
@@ -339,7 +341,7 @@ export const bookingsService = {
         customerId: input.customerId,
         serviceIds: input.serviceIds,
         appointmentAt: input.appointmentAt,
-        actorType: "OWNER",
+        actorType: input.actorType ?? "OWNER",
         notes: input.notes ?? null,
         stylist: input.stylist,
       });

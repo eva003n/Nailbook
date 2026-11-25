@@ -1211,6 +1211,60 @@ Returns available time slots for a given service and date. Used by the customer 
 
 ---
 
+## Public Website APIs
+
+Unauthenticated endpoints used by the customer website (`/`, `/book`, `/my-booking`). No JWT; every route is rate-limited per IP (`publicRateLimit`: 60 req / 15 min). Access to a booking is checked with its **reference + the customer's phone number**; a mismatch returns `404` so references cannot be probed. Phone numbers are accepted as `07…`, `01…`, `+254…`, `254…` or 9 bare digits and normalised to `254XXXXXXXXX`.
+
+Payment follows the normal booking rules: a website booking is created `PENDING`, staff approve it in the PWA, then the customer can pay the full price via STK Push.
+
+### GET /public/services
+
+Active services. Response `data`: `[{ id, name, description, category, priceKes, durationMinutes }]`.
+
+### GET /public/slots/availability
+
+Same query and response as `GET /slots/availability` (`serviceIds` comma-separated, `date` `YYYY-MM-DD`).
+
+### POST /public/bookings
+
+Rate limit: 5 per hour per IP (`publicBookingRateLimit`).
+
+```json
+{
+  "name": "Amina Wanjiru",
+  "phone": "0712345678",
+  "serviceIds": ["uuid"],
+  "appointmentAt": "2026-12-01T07:00:00.000Z",
+  "notes": "Optional, max 500 chars",
+  "consent": true
+}
+```
+
+Finds or creates the customer by phone (KDPA consent required), then creates a `PENDING` booking with `actorType: CUSTOMER`. `201` → `{ reference, status, appointmentAt, durationMinutes, priceKes, services: [{ name }] }`.
+
+| Status | Code | When |
+|---|---|---|
+| `400` | `VALIDATION_ERROR` | Missing fields or `consent` not `true` |
+| `422` | `INVALID_PHONE` | Not a Kenyan mobile number |
+| `422` | `INVALID_APPOINTMENT_AT` | Time in the past |
+| `409` | `BOOKING_SLOT_UNAVAILABLE` | Slot taken meanwhile |
+
+### GET /public/bookings/:reference?phone=
+
+`200` → `{ reference, status, paymentStatus, appointmentAt, durationMinutes, priceKes, services, canPay }`. `canPay` is `true` when the booking is `APPROVED` and has no successful payment. `404` when the reference/phone pair doesn't match.
+
+### POST /public/bookings/:reference/pay
+
+Headers: `Idempotency-Key` (required, new value per attempt). Rate limit: `stkPushRateLimit`.
+
+```json
+{ "phone": "0712345678", "phoneNumber": "0712345678" }
+```
+
+`phone` is the number the booking was made with (ownership check); `phoneNumber` receives the STK prompt. Queues the STK Push like `POST /payments/stk-push`. `202` → `{ status: "PENDING", amountKes }`. Poll `GET /public/bookings/:reference` for the result. `422 PAYMENT_NOT_ALLOWED` when the booking isn't approved or is already paid.
+
+---
+
 ## Notifications API
 
 ### GET /notifications/reminders
