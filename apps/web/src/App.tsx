@@ -10,6 +10,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useAuthStore } from "@/store/auth.store";
 import { useSSE } from "@/hooks/useSSE";
+import { useUiStore } from "@/store/ui.store";
+import { useThemeSync } from "@/lib/theme";
 import AppShell from "@/components/layout/AppShell";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
@@ -50,6 +52,15 @@ const CreateBookingPage = lazy(
 ); ;
 
 
+/*______________ Public website (named exports) ________________ */
+const HomePage = lazy(() => import("@/pages/site/HomePage").then((m) => ({ default: m.HomePage })));
+const ServicesPage = lazy(() => import("@/pages/site/ServicesPage").then((m) => ({ default: m.ServicesPage })));
+const BookPage = lazy(() => import("@/pages/site/BookPage").then((m) => ({ default: m.BookPage })));
+const FaqPage = lazy(() => import("@/pages/site/FaqPage").then((m) => ({ default: m.FaqPage })));
+const MyBookingPage = lazy(() => import("@/pages/site/MyBookingPage").then((m) => ({ default: m.MyBookingPage })));
+const NotFoundPage = lazy(() => import("@/pages/site/NotFoundPage").then((m) => ({ default: m.NotFoundPage })));
+
+import { SiteLayout } from "@/components/site/SiteLayout";
 import PublicRoute from "@/components/layout/PublicRoute";
 import { InstallPromptProvider } from "./hooks/useInstallPrompt";
 import ServiceWorkerPrompt from "@/components/ui/ServiceWorkerPrompt";
@@ -80,12 +91,21 @@ function PageFallback() {
           height: 32,
           borderRadius: "var(--radius-full)",
           border: "3px solid var(--color-border)",
-          borderTopColor: "var(--color-accent)",
+          borderTopColor: "var(--color-plum)",
           animation: "spin 0.8s linear infinite",
         }}
       />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
+  );
+}
+
+/** Wrap a routed page in its error boundary + lazy-load fallback. */
+function page(element: React.ReactNode, fallback: React.ReactNode = <PageFallback />) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={fallback}>{element}</Suspense>
+    </ErrorBoundary>
   );
 }
 
@@ -159,8 +179,19 @@ function AppInner() {
         onReload={() => updateServiceWorker(true)}
       />
       <Routes>
+        {/* Public customer website */}
+        <Route element={<SiteLayout />}>
+          <Route index element={page(<HomePage />)} />
+          <Route path="services" element={page(<ServicesPage />)} />
+          <Route path="book" element={page(<BookPage />)} />
+          <Route path="faq" element={page(<FaqPage />)} />
+          <Route path="my-booking" element={page(<MyBookingPage />)} />
+          <Route path="*" element={page(<NotFoundPage />)} />
+        </Route>
+
+        {/* Staff app */}
         <Route
-          path="/login"
+          path="/admin/login"
           element={
             <PublicRoute>
               <Login />
@@ -168,7 +199,7 @@ function AppInner() {
           }
         />
         <Route
-          path="/"
+          path="/admin"
           element={
             <ProtectedRoute>
               <AppSSEProvider>
@@ -181,39 +212,34 @@ function AppInner() {
         >
           {[
             { path: "dashboard", element: <DashboardPage /> },
-            { path: "bookings", element: <BookingsPage /> },
-            { path: "bookings/new", element: <CreateBookingPage /> },
-            { path: "bookings/:id", element: <BookingDetailPage /> },
-            {
-              path: "bookings/:id/reschedule",
-              element: <RescheduleBookingPage />,
-            },
-            { path: "customers", element: <CustomersPage /> },
-            { path: "customers/:id", element: <CustomerDetailPage /> },
             { path: "payments", element: <PaymentsPage /> },
             { path: "payments/:id", element: <PaymentDetailPage /> },
             { path: "settings", element: <SettingsPage /> },
             { path: "notifications", element: <NotificationsPage /> },
           ].map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={
-                <ErrorBoundary>
-                  <Suspense fallback={<PageFallback />}>{element}</Suspense>
-                </ErrorBoundary>
-              }
-            />
+            <Route key={path} path={path} element={page(element)} />
           ))}
-          <Route index element={<Navigate to="/dashboard" replace />} />
+
+          {/* List + detail: detail routes render inside the list page's <Outlet /> */}
+          <Route path="bookings" element={page(<BookingsPage />)}>
+            <Route path="new" element={page(<CreateBookingPage />, null)} />
+            <Route path=":id" element={page(<BookingDetailPage />)}>
+              <Route path="reschedule" element={page(<RescheduleBookingPage />, null)} />
+            </Route>
+          </Route>
+          <Route path="customers" element={page(<CustomersPage />)}>
+            <Route path=":id" element={page(<CustomerDetailPage />)} />
+          </Route>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </>
   );
 }
 
 export default function App() {
+  useThemeSync(useUiStore((s) => s.theme));
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={null}>

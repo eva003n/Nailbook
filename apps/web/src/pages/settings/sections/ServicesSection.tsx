@@ -23,7 +23,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import ErrorState from "@/components/ui/ErrorState";
 import Skeleton from "@/components/ui/Skeleton";
 import type { Service, ServiceCategory } from "@/lib/schemas";
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, Plus } from "lucide-react";
+import NailSwatch from "@/components/ui/NailSwatch";
+import { SERVICE_CATEGORY_META } from "@/lib/serviceCategory";
 
 // ─── Schema (matches Prisma enum) ──────────────────────────────────────────
 
@@ -267,7 +269,8 @@ export default function ServicesSection() {
           onClick={openAddSheet}
           style={{ width: "auto", padding: "0 var(--space-16)" }}
         >
-          + Add Service
+          <Plus size={18} aria-hidden="true" />
+          Add service
         </Button>
       </div>
 
@@ -276,17 +279,8 @@ export default function ServicesSection() {
         if (!items || items.length === 0) return null;
         return (
           <div key={cat} style={{ marginBottom: "var(--space-20)" }}>
-            <p
-              style={{
-                fontSize: "13px",
-                lineHeight: "18px",
-                letterSpacing: "0.6px",
-                fontWeight: 500,
-                textTransform: "uppercase",
-                color: "var(--color-text-secondary)",
-                marginBottom: "var(--space-8)",
-              }}
-            >
+            <p className="mb-2 flex items-center gap-2.5 text-[0.9375rem] font-bold text-ink">
+              <NailSwatch color={SERVICE_CATEGORY_META[cat]?.color ?? "var(--color-mauve)"} width={12} height={16} />
               {CATEGORY_LABELS[cat]}
             </p>
             <div
@@ -326,8 +320,7 @@ export default function ServicesSection() {
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
-                        {service.durationMinutes} min ·{" "}
-                        {formatKES(service.priceKes)}
+                        {service.durationMinutes} min, {formatKES(service.priceKes)}
                       </p>
                       {service.description && (
                         <p

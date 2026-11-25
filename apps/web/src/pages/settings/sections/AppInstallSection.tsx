@@ -41,7 +41,7 @@ export function AppInstallSection() {
             width: 56,
             height: 56,
             borderRadius: "var(--radius-lg)",
-            background: "var(--color-primary-bg, rgba(99, 102, 241, 0.1))",
+            background: "var(--color-petal)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

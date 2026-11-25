@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Plus, ChevronLeft } from "lucide-react";
+import NailSwatch from "@/components/ui/NailSwatch";
+import { DateStrip, SlotGrid, StepIndicator } from "@/pages/bookings/components/SlotPicker";
+import { nextDays } from "@/pages/bookings/components/dateOptions";
+import { SERVICE_CATEGORY_META } from "@/lib/serviceCategory";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Avatar from "@/components/ui/Avatar";
@@ -62,18 +66,7 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
       selectedDate,
     );
 
-  const dateOptions = useMemo(() => {
-    const days: { iso: string; label: string }[] = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      days.push({
-        iso: d.toISOString().slice(0, 10),
-        label: d.toLocaleDateString("en-KE", { weekday: "short", day: "numeric" }),
-      });
-    }
-    return days;
-  }, []);
+  const dateOptions = useMemo(() => nextDays(14), []);
 
   const createMutation = useCreateBooking();
 
@@ -92,7 +85,7 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
       },
       {
         onSuccess: (booking) => {
-          showToast({ type: "success", message: `Booking created! ${booking.reference}` });
+          showToast({ type: "success", message: `Booking created. Reference ${booking.reference}` });
           onSuccess();
         },
         onError: (err: unknown) => {
@@ -114,29 +107,18 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
 
   return (
     <div className="flex flex-col gap-5">
-      <div
-        className="flex items-center gap-1.5"
-        aria-label={`Step ${step} of 4`}
-      >
-        {[1, 2, 3, 4].map((s) => (
-          <span
-            key={s}
-            className={`h-1.5 flex-1 rounded-full ${s <= step ? "bg-primary" : "bg-divider"}`}
-            aria-hidden="true"
-          />
-        ))}
-      </div>
+      <StepIndicator step={step} labels={["Customer", "Service", "Date", "Confirm"]} />
 
       {step === 1 && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-md font-semibold text-text-primary">
+          <h3 className="font-display text-lg font-semibold">
             Who's this for?
           </h3>
           {!newCustomerMode ? (
             <>
               <Input
                 label="Customer"
-                placeholder="Search by name..."
+                placeholder="Search by name or phone"
                 value={customerQuery}
                 onChange={(e) => {
                   setCustomerQuery(e.target.value);
@@ -144,10 +126,10 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
                 }}
               />
               {customerQuery && (
-                <div className="max-h-48 overflow-y-auto rounded-[--radius-md] border border-border">
+                <div className="max-h-56 overflow-y-auto rounded-(--radius-md) border border-line bg-surface">
                   {(customerResults?.data ?? []).length === 0 ? (
-                    <p className="px-3 py-3 text-sm text-text-secondary">
-                      No matches found.
+                    <p className="px-3 py-3 text-sm text-ink-2">
+                      No customers match. Add them as a new customer.
                     </p>
                   ) : (
                     customerResults?.data.map((c) => (
@@ -157,17 +139,17 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
                           setSelectedCustomer(c);
                           setCustomerQuery(c.name);
                         }}
-                        className={`flex w-full min-h-11 items-center gap-3 px-3 text-left ${
+                        className={`flex w-full min-h-12 items-center gap-3 px-3 text-left hover:bg-paper ${
                           selectedCustomer?.id === c.id
-                            ? "bg-primary-light"
+                            ? "bg-petal"
                             : ""
                         }`}
                       >
                         <Avatar name={c.name} size="sm" />
-                        <span className="text-sm text-text-primary">
+                        <span className="text-[0.9375rem] font-semibold text-ink">
                           {c.name}
                         </span>
-                        <span className="ml-auto text-xs text-text-secondary">
+                        <span className="ml-auto text-[0.8125rem] text-ink-2">
                           {c.phone}
                         </span>
                       </button>
@@ -177,9 +159,10 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
               )}
               <button
                 onClick={() => setNewCustomerMode(true)}
-                className="min-h-11 self-start text-sm font-semibold text-primary"
+                className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-plum-deep"
               >
-                + New customer
+                <Plus size={16} aria-hidden="true" />
+                New customer
               </button>
             </>
           ) : (
@@ -198,13 +181,14 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
               />
               <button
                 onClick={() => setNewCustomerMode(false)}
-                className="min-h-11 self-start text-sm font-semibold text-primary"
+                className="inline-flex min-h-11 items-center gap-1 self-start text-sm font-semibold text-plum-deep"
               >
-                ← Search existing customer
+                <ChevronLeft size={16} aria-hidden="true" />
+                Search existing customers
               </button>
             </>
           )}
-          <Button fullWidth disabled={!canGoStep2} onClick={() => setStep(2)}>
+          <Button size="lg" fullWidth disabled={!canGoStep2} onClick={() => setStep(2)}>
             Continue
           </Button>
         </div>
@@ -212,11 +196,11 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
 
       {step === 2 && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-md font-semibold text-text-primary">
+          <h3 className="font-display text-lg font-semibold">
             Choose services
           </h3>
           {servicesLoading ? (
-            <p className="text-sm text-text-secondary">Loading services…</p>
+            <div className="flex flex-col gap-2">{[1, 2, 3].map((i) => <span key={i} className="h-16 animate-pulse rounded-(--radius-md) bg-petal" />)}</div>
           ) : (
             <div className="flex flex-col gap-2">
               {servicesList.map((s) => {
@@ -225,21 +209,25 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
                   <button
                     key={s.id}
                     onClick={() => toggleService(s.id)}
-                    className={`flex min-h-11 items-center justify-between rounded-[--radius-md] border px-3 py-3 text-left ${
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    className={`flex min-h-16 items-center gap-3 rounded-(--radius-md) border px-4 py-3 text-left transition-colors ${
                       isSelected
-                        ? "border-primary bg-primary-light"
-                        : "border-border"
+                        ? "border-plum bg-petal"
+                        : "border-line bg-surface hover:border-mauve"
                     }`}
                   >
-                    <span>
-                      <span className="block text-sm font-medium text-text-primary">
+                    <NailSwatch color={SERVICE_CATEGORY_META[s.category]?.color ?? "var(--color-mauve)"} width={12} height={18} />
+                    <span className="flex-1">
+                      <span className="block text-[0.9375rem] font-semibold text-ink">
                         {s.name}
                       </span>
-                      <span className="block text-xs text-text-secondary">
+                      <span className="block text-[0.8125rem] text-ink-2">
                         {s.durationMinutes} min
                       </span>
                     </span>
-                    <span className="text-sm font-semibold text-text-primary">
+                    {isSelected && <Check size={18} className="text-plum" aria-hidden="true" />}
+                    <span className="text-[0.9375rem] font-semibold text-ink tabular-nums">
                       {formatKes(s.priceKes)}
                     </span>
                   </button>
@@ -248,10 +236,8 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
             </div>
           )}
           {selectedServiceIds.length > 0 && (
-            <p className="text-xs text-text-secondary">
-              {selectedServices.length} service
-              {selectedServices.length > 1 ? "s" : ""} selected ·{" "}
-              {totalDuration} min total · {formatKes(totalPrice)}
+            <p className="text-sm text-ink-2">
+              {selectedServices.length} {selectedServices.length > 1 ? "services" : "service"}, {totalDuration} min, {formatKes(totalPrice)}
             </p>
           )}
           <div className="flex gap-3">
@@ -271,52 +257,18 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
 
       {step === 3 && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-md font-semibold text-text-primary">
-            Pick date & time
+          <h3 className="font-display text-lg font-semibold">
+            Pick a day, then an open time
           </h3>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {dateOptions.map((d) => (
-              <button
-                key={d.iso}
-                onClick={() => {
-                  setSelectedDate(d.iso);
-                  setSelectedSlot(null);
-                }}
-                className={`min-h-11 shrink-0 rounded-[--radius-md] px-4 text-sm font-medium ${
-                  selectedDate === d.iso
-                    ? "bg-primary text-white"
-                    : "bg-surface-raised text-text-primary"
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-          {slotsLoading ? (
-            <p className="text-sm text-text-secondary">Loading slots…</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {(slots ?? []).map((slot) => (
-                <button
-                  key={slot.time}
-                  disabled={!slot.available}
-                  onClick={() => setSelectedSlot(slot.appointmentAt)}
-                  className={`min-h-11 rounded-[--radius-md] text-sm font-medium disabled:opacity-40 ${
-                    selectedSlot === slot.appointmentAt
-                      ? "bg-primary text-white"
-                      : "bg-surface-raised text-text-primary"
-                  }`}
-                >
-                  {formatTime(slot.appointmentAt)}
-                </button>
-              ))}
-              {!slotsLoading && (slots ?? []).length === 0 && (
-                <p className="col-span-3 text-sm text-text-secondary">
-                  No slots available this day.
-                </p>
-              )}
-            </div>
-          )}
+          <DateStrip
+            days={dateOptions}
+            value={selectedDate}
+            onChange={(iso) => {
+              setSelectedDate(iso);
+              setSelectedSlot(null);
+            }}
+          />
+          <SlotGrid slots={slots ?? []} value={selectedSlot} onChange={setSelectedSlot} loading={slotsLoading} />
           <div className="flex gap-3">
             <Button variant="secondary" fullWidth onClick={() => setStep(2)}>
               Back
@@ -334,40 +286,40 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
 
       {step === 4 && selectedServices.length > 0 && selectedSlot && (
         <div className="flex flex-col gap-4">
-          <h3 className="text-md font-semibold text-text-primary">
-            Review & confirm
+          <h3 className="font-display text-lg font-semibold">
+            Review and confirm
           </h3>
-          <div className="rounded-[--radius-md] bg-surface-raised p-4">
+          <div className="rounded-(--radius-lg) border border-line bg-paper p-5">
             <div className="flex items-center gap-3">
               <Avatar name={customerName} />
-              <span className="text-sm font-semibold text-text-primary">
+              <span className="text-base font-semibold text-ink">
                 {customerName}
               </span>
             </div>
-            <dl className="mt-3 space-y-2 text-sm">
+            <dl className="mt-4 space-y-3 text-[0.9375rem]">
               <div className="flex justify-between">
-                <dt className="text-text-secondary">Services</dt>
-                <dd className="font-medium text-text-primary text-right">
+                <dt className="text-ink-2">Services</dt>
+                <dd className="font-medium text-ink text-right">
                   {selectedServices.map((s) => (
                     <div key={s.id}>{s.name}</div>
                   ))}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-text-secondary">Time</dt>
-                <dd className="font-medium text-text-primary">
-                  {formatTime(selectedSlot)}
+                <dt className="text-ink-2">When</dt>
+                <dd className="font-medium text-ink">
+                  {new Date(selectedSlot).toLocaleDateString("en-KE", { weekday: "short", day: "numeric", month: "short" })}, {formatTime(selectedSlot)}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-text-secondary">Duration</dt>
-                <dd className="font-medium text-text-primary">
+                <dt className="text-ink-2">Duration</dt>
+                <dd className="font-medium text-ink">
                   {totalDuration} min
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-text-secondary">Total</dt>
-                <dd className="font-medium text-text-primary">
+                <dt className="text-ink-2">Total</dt>
+                <dd className="font-medium text-ink">
                   {formatKes(totalPrice)}
                 </dd>
               </div>
@@ -383,7 +335,7 @@ export default function CreateBookingForm({ onSuccess, onRequestClose }: CreateB
               loading={createMutation.isPending}
             >
               <Check className="h-4 w-4" aria-hidden="true" />
-              Confirm Booking
+              Confirm booking
             </Button>
           </div>
         </div>

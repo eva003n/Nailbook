@@ -23,7 +23,7 @@ api.interceptors.response.use(
       original &&
       !original._retry &&
       !skipRedirectUrls.includes(original.url ?? "") &&
-      window.location.pathname !== "/login"
+      window.location.pathname !== "/admin/login"
     ) {
       original._retry = true;
       // Session expired (30 min idle / 12 h absolute): ProtectedRoute redirects to /login.

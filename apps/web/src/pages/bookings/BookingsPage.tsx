@@ -1,317 +1,202 @@
 /**
- * §4.2 Bookings Page
- *
- * Single-column card list (no tables — §1.2 anti-pattern).
- * §7.2: Empty state with icon + CTA.
- * §7.1: Skeleton loading (not text "Loading...").
- * §8.1: KES amounts tabular-nums.
+ * Bookings — list grouped by day, with search and filters.
+ * lg+: list on the left, selected booking (nested route) on the right.
+ * < lg: list OR detail, depending on the URL.
  */
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useBookings, useDeleteBooking } from "./hooks/useBookings";
-import { CalendarDays, Trash2 } from "lucide-react";
-import PageHeader from "@/components/layout/PageHeader";
-import Card from "@/components/ui/Card";
-import Badge, { bookingStatusToBadge, paymentStatusToBadge } from "@/components/ui/Badge";
-import EmptyState from "@/components/ui/EmptyState";
-// import ErrorState from "@/components/ui/ErrorState";
-import Skeleton from "@/components/ui/Skeleton";
+import { useEffect, useMemo, useState } from "react";
+import { Outlet, useMatch, useNavigate, useSearchParams } from "react-router-dom";
+import { CalendarDays, MousePointerClick, Plus, Search } from "lucide-react";
+import { clsx } from "clsx";
+import { useBookings } from "./hooks/useBookings";
+import BookingCard from "@/components/ui/BookingCard";
 import Button from "@/components/ui/Button";
-import Dialog from "@/components/ui/Dialog";
+import EmptyState from "@/components/ui/EmptyState";
+import ErrorState from "@/components/ui/ErrorState";
 import Pagination from "@/components/ui/Pagination";
-import { useAuthStore } from "@/store/auth.store";
-import { useUiStore } from "@/store/ui.store";
-import { ErrorState } from "@/components/ui";
+import SegmentedControl from "@/components/ui/SegmentedControl";
+import { BookingCardSkeleton } from "@/components/ui/Skeleton";
+import NotificationBell from "@/components/NotificationBell";
+import { formatDate, isToday } from "@/lib/format";
+import { bookingServiceLabel } from "@/lib/serviceCategory";
+import type { Booking } from "@/lib/schemas";
 
-/* §8.1 KES format */
-function formatKES(amount: number): string {
-  return `KES\u00A0${amount.toLocaleString("en-KE")}`;
+type Tab = "today" | "all";
+
+const STATUS_FILTERS: { value: string; label: string }[] = [
+  { value: "", label: "Any status" },
+  { value: "PENDING", label: "Pending" },
+  { value: "APPROVED", label: "Confirmed" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "CANCELLED", label: "Cancelled" },
+  { value: "NO_SHOW", label: "No-show" },
+];
+
+function groupByDay(bookings: Booking[]) {
+  const groups = new Map<string, Booking[]>();
+  for (const b of bookings) {
+    const key = new Date(b.appointmentAt).toDateString();
+    const list = groups.get(key) ?? [];
+    list.push(b);
+    groups.set(key, list);
+  }
+  return [...groups.values()];
 }
 
-/* §8.2 Date: "Tue, 16 Jun · 9:00 AM" */
-function formatDateTime(isoString: string): string {
-  const d = new Date(isoString);
-  return d.toLocaleDateString("en-KE", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }) + " · " + d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+function useDebounced<T>(value: T, ms = 300) {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return v;
 }
-
-const STATUS_FILTERS = ["", "PENDING", "APPROVED", "CANCELLED", "COMPLETED", "NO_SHOW"] as const;
 
 export default function BookingsPage() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState("");
+  const [params, setParams] = useSearchParams();
+  const status = params.get("status") ?? "";
+  const [tab, setTab] = useState<Tab>(status ? "all" : "today");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  const { data: result, isLoading, error, refetch  } = useBookings({
-    status: filter || undefined,
-    page,
-    limit,
-  });
-  const deleteMutation = useDeleteBooking();
-  const user = useAuthStore((s) => s.user);
-  const showToast = useUiStore((s) => s.showToast);
-  const isOwner = user?.role === "OWNER";
+  const [limit, setLimit] = useState(20);
+  const [query, setQuery] = useState("");
+  const q = useDebounced(query.trim().toLowerCase());
 
-  const bookings = result?.data ?? [];
-  const meta = result?.meta;
+  const detailMatch = useMatch("/admin/bookings/:id/*");
+  const selectedId = detailMatch?.params.id && detailMatch.params.id !== "new" ? detailMatch.params.id : undefined;
 
-  // if (error) return <ErrorState message="Couldn't load your bookings." onRetry={refetch} />;
+  const { data: result, isLoading, error, refetch } = useBookings(
+    tab === "today" ? { tab: "today" } : { status: status || undefined, page, limit },
+  );
 
-  const handleDelete = () => {
-    if (!deleteTarget) return;
-    deleteMutation.mutate(deleteTarget.id, {
-      onSuccess: () => {
-        showToast({ type: "success", message: "Booking deleted." });
-        setDeleteTarget(null);
-      },
-      onError: () => {
-        showToast({ type: "error", message: "Failed to delete booking. It may have a paid or refunded payment." });
-        setDeleteTarget(null);
-      },
-    });
+  const bookings = useMemo(() => {
+    const list = [...(result?.data ?? [])];
+    const filtered = tab === "today" && status ? list.filter((b) => b.status === status) : list;
+    const searched = q
+      ? filtered.filter((b) => b.customer.name.toLowerCase().includes(q) || bookingServiceLabel(b).toLowerCase().includes(q) || b.customer.phone.includes(q))
+      : filtered;
+    return searched.sort((a, b) => a.appointmentAt.localeCompare(b.appointmentAt));
+  }, [result, tab, status, q]);
+  const meta = tab === "all" ? result?.meta : undefined;
+
+  const setStatus = (value: string) => {
+    setPage(1);
+    const next = new URLSearchParams(params);
+    if (value) next.set("status", value);
+    else next.delete("status");
+    setParams(next, { replace: true });
   };
 
   return (
-    <div>
-      <PageHeader
-        title="Bookings"
-        showBack={false}
-        action={
-          <Button variant="secondary" onClick={() => navigate("/bookings/new")}>
-            + New
-          </Button>
-        }
-      />
-
-      <div style={{ padding: "var(--space-16)" }}>
-        {/* §4.2 Filter tabs */}
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-8)",
-            overflowX: "auto",
-            marginBottom: "var(--space-16)",
-            scrollbarWidth: "none",
-          }}
-        >
-          {STATUS_FILTERS.map((status) => (
-            <button
-              key={status || "all"}
-              onClick={() => setFilter(status)}
-              style={{
-                flexShrink: 0,
-                height: 36,
-                padding: "0 var(--space-16)",
-                borderRadius: "var(--radius-full)",
-                border: `1.5px solid ${filter === status ? "var(--color-primary)" : "var(--color-border)"}`,
-                background:
-                  filter === status
-                    ? "var(--color-primary)"
-                    : "var(--color-surface)",
-                color:
-                  filter === status
-                    ? "var(--color-text-inverse)"
-                    : "var(--color-text-primary)",
-                fontSize: "13px",
-                lineHeight: "18px",
-                fontWeight: 500,
-                cursor: "pointer",
-                transition: "all var(--duration-fast) var(--ease-out)",
-              }}
-            >
-              {status || "All"}
-            </button>
-          ))}
+    <div className="flex min-h-full flex-1">
+      {/* List column */}
+      <section
+        className={clsx(
+          "flex w-full flex-col gap-4 px-5 pt-6 pb-6 md:px-8 md:pt-8 lg:w-110 lg:shrink-0 lg:border-r lg:border-line lg:px-6 lg:pt-9",
+          selectedId && "hidden lg:flex",
+        )}
+        aria-label="Bookings list"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="font-display text-[1.875rem] leading-9 font-bold tracking-[-0.02em] md:text-[2rem] md:leading-9.5">Bookings</h1>
+          <div className="flex items-center gap-2.5">
+            <span className="lg:hidden">
+              <NotificationBell />
+            </span>
+            <Button fullWidth={false} onClick={() => navigate("/admin/bookings/new")}>
+              <Plus size={18} aria-hidden="true" />
+              New
+            </Button>
+          </div>
         </div>
 
-        {/* §7.1 Loading skeleton */}
-        {isLoading ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-12)",
+        <div className="flex flex-wrap items-center gap-2.5">
+          <SegmentedControl
+            aria-label="Booking range"
+            options={[
+              { value: "today", label: "Today" },
+              { value: "all", label: "All" },
+            ]}
+            value={tab}
+            onChange={(v) => {
+              setTab(v);
+              setPage(1);
             }}
+          />
+          <label className="sr-only" htmlFor="booking-status">
+            Status
+          </label>
+          <select
+            id="booking-status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="h-11 rounded-(--radius-md) border border-line bg-surface px-3 text-sm font-semibold text-ink focus:border-plum focus:outline-none"
           >
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <Skeleton shape="text" width="30%" height="16px" />
-                <div style={{ height: "var(--space-8)" }} />
-                <Skeleton shape="text" width="50%" height="14px" />
-                <div style={{ height: "var(--space-4)" }} />
-                <Skeleton shape="text" width="40%" height="13px" />
-              </Card>
+            {STATUS_FILTERS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <label className="flex h-11 items-center gap-2.5 rounded-(--radius-md) border border-line bg-surface px-3.5 focus-within:border-plum">
+          <Search size={18} className="text-ink-3" aria-hidden="true" />
+          <span className="sr-only">Search bookings</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search name, phone or service"
+            className="h-full flex-1 bg-transparent text-[0.9375rem] text-ink placeholder:text-ink-3 focus:outline-none"
+          />
+        </label>
+
+        {isLoading ? (
+          <div className="flex flex-col gap-1">
+            {[1, 2, 3, 4].map((i) => (
+              <BookingCardSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
-          <ErrorState
-            message={error.message ?? "Couldn't load your bookings."}
-            onRetry={refetch}
-          ></ErrorState>
-        ) : bookings.length === 0 && (!meta || meta.total === 0) ? (
-          /* §7.2 Empty state */
+          <ErrorState heading="Couldn't load bookings" message={error.message ?? "Check your connection and try again."} onRetry={refetch} />
+        ) : bookings.length === 0 ? (
           <EmptyState
             icon={CalendarDays}
-            heading="No bookings yet"
-            description="Your schedule is clear. Book a client to get started."
+            heading="No bookings found"
+            description={
+              q || status
+                ? "Try a different search or status."
+                : "Share the website booking link with clients to get started."
+            }
             action={
-              <Button onClick={() => navigate("/bookings/new")}>
-                Book Appointment
+              <Button fullWidth={false} onClick={() => navigate("/admin/bookings/new")}>
+                <Plus size={18} aria-hidden="true" />
+                New booking
               </Button>
             }
           />
         ) : (
-          <>
-            {/* §4.2 Single-column card list */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-12)",
-              }}
-            >
-              {bookings.map((booking) => (
-                <Card
-                  key={booking.id}
-                  onClick={() => navigate(`/bookings/${booking.id}`)}
-                >
-                  {/* Time + Status */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "var(--space-8)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "16px",
-                        lineHeight: "22px",
-                        fontWeight: 500,
-                        color: "var(--color-text-primary)",
-                      }}
-                    >
-                      {formatDateTime(booking.appointmentAt)}
-                    </span>
-                    <Badge
-                      variant={bookingStatusToBadge(booking.status).variant}
-                      ariaLabel={`Status: ${booking.status}`}
-                    >
-                      {bookingStatusToBadge(booking.status).label}
-                    </Badge>
-                  </div>
-
-                  {/* Client + Service */}
-                  <p
-                    style={{
-                      fontSize: "16px",
-                      lineHeight: "22px",
-                      color: "var(--color-text-primary)",
-                      margin: 0,
-                    }}
-                  >
-                    {booking.customer.name}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      lineHeight: "18px",
-                      color: "var(--color-text-tertiary)",
-                      margin: "var(--space-2) 0 0",
-                    }}
-                  >
-                    {booking.service?.name ??
-                      booking.services?.[0]?.service?.name ??
-                      "Nail Service"}
-                  </p>
-
-                  {/* Amount + Payment status + Delete */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: "var(--space-12)",
-                      paddingTop: "var(--space-12)",
-                      borderTop: "1px solid var(--color-border)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "16px",
-                        lineHeight: "22px",
-                        fontWeight: 500,
-                        color: "var(--color-text-primary)",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {formatKES(booking.priceKes)}
-                    </span>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "var(--space-8)",
-                      }}
-                    >
-                      <Badge
-                        variant={
-                          paymentStatusToBadge(booking.paymentStatus).variant
-                        }
-                        ariaLabel={`Status: ${booking.paymentStatus}`}
-                      >
-                        {paymentStatusToBadge(booking.paymentStatus).label}
-                      </Badge>
-                      {isOwner && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteTarget({
-                              id: booking.id,
-                              name: booking.customer.name,
-                            });
-                          }}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            padding: 4,
-                            cursor: "pointer",
-                            color: "var(--color-text-tertiary)",
-                            borderRadius: "var(--radius-sm)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            transition:
-                              "color var(--duration-fast) var(--ease-out)",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.color = "var(--color-error)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.color =
-                              "var(--color-text-tertiary)")
-                          }
-                          aria-label={`Delete booking for ${booking.customer.name}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+          <div className="flex flex-col">
+            {groupByDay(bookings).map((group) => {
+              const iso = group[0].appointmentAt;
+              return (
+                <div key={iso} className="flex flex-col">
+                  <h2 className="px-3 pt-4 pb-1.5 text-sm font-semibold text-ink-2 first:pt-1">
+                    {isToday(iso) ? `Today, ${formatDate(iso)}` : formatDate(iso)}
+                  </h2>
+                  {group.map((b) => (
+                    <BookingCard
+                      key={b.id}
+                      booking={b}
+                      selected={b.id === selectedId}
+                      showPayment={b.status === "APPROVED" && b.paymentStatus !== "SUCCESS"}
+                    />
+                  ))}
+                </div>
+              );
+            })}
             {meta && meta.totalPages > 1 && (
-              <div className="px-4 py-3">
+              <div className="pt-4">
                 <Pagination
                   page={meta.page}
                   totalPages={meta.totalPages}
@@ -324,25 +209,23 @@ export default function BookingsPage() {
                 />
               </div>
             )}
-          </>
+          </div>
         )}
-      </div>
+      </section>
 
-      {/* Delete confirmation dialog */}
-      <Dialog
-        open={!!deleteTarget}
-        title="Delete this booking?"
-        description={
-          deleteTarget
-            ? `Permanently delete the booking for ${deleteTarget.name}? This cannot be undone.`
-            : ""
-        }
-        confirmLabel="Delete"
-        destructive
-        isConfirming={deleteMutation.isPending}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteTarget(null)}
-      />
+      {/* Detail column (desktop) / full screen (mobile when selected) */}
+      <section className={clsx("min-w-0 flex-1 bg-surface", selectedId ? "flex flex-col" : "hidden lg:flex lg:flex-col")}>
+        {selectedId ? (
+          <Outlet />
+        ) : (
+          <div className="flex flex-1 items-center justify-center">
+            <EmptyState icon={MousePointerClick} heading="Pick a booking" description="Its details and actions show up here." />
+          </div>
+        )}
+      </section>
+
+      {/* /bookings/new renders as a sheet/modal over the list */}
+      {!selectedId && <Outlet />}
     </div>
   );
 }

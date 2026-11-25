@@ -14,14 +14,14 @@ export default function Toggle({ checked, onChange, ariaLabel, disabled }: Toggl
       onClick={() => onChange(!checked)}
       disabled={disabled}
       style={{
-        width: 51,
-        height: 31,
+        width: 44,
+        height: 26,
         borderRadius: "var(--radius-full)",
         border: "none",
         cursor: disabled ? "not-allowed" : "pointer",
         position: "relative",
         transition: "background 200ms ease-out",
-        background: checked ? "var(--color-primary)" : "var(--color-border-strong)",
+        background: checked ? "var(--color-plum)" : "var(--color-border-strong)",
         flexShrink: 0,
         opacity: disabled ? 0.5 : 1,
       }}
@@ -29,10 +29,10 @@ export default function Toggle({ checked, onChange, ariaLabel, disabled }: Toggl
       <span
         style={{
           position: "absolute",
-          top: 2,
-          left: checked ? 22 : 2,
-          width: 27,
-          height: 27,
+          top: 3,
+          left: checked ? 21 : 3,
+          width: 20,
+          height: 20,
           borderRadius: "var(--radius-full)",
           background: "white",
           transition: "left 200ms ease-out",

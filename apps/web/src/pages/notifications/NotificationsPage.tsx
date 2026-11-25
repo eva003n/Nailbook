@@ -156,14 +156,14 @@ export default function NotificationsPage() {
 
     // Navigate to booking detail if we have a booking reference
     if (notification.booking?.id) {
-      navigate(`/bookings/${notification.booking.id}`);
+      navigate(`/admin/bookings/${notification.booking.id}`);
     }
   };
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto w-full max-w-3xl md:pt-4">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-bg px-4 py-3">
+      <div className="sticky top-0 z-10 bg-paper px-4 py-3 md:px-8">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -172,7 +172,7 @@ export default function NotificationsPage() {
           >
             <ArrowLeft size={22} strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold text-text-primary">Notifications</h1>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink">Notifications</h1>
         </div>
       </div>
 

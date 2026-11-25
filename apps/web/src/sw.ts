@@ -81,7 +81,7 @@ self.addEventListener("push", (event) => {
     title: "Nailbook",
     body: "You have a new notification.",
     icon: "/icons/192.png",
-    data: { url: "/", notificationId: "" },
+    data: { url: "/admin/dashboard", notificationId: "" },
     tag: Date.now().toString(),
   };
 
@@ -110,7 +110,7 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url ?? "/";
+  const urlToOpen = event.notification.data?.url ?? "/admin/dashboard";
 
   event.waitUntil(
     self.clients

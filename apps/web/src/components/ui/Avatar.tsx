@@ -1,20 +1,20 @@
 interface AvatarProps {
   name: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
-const COLORS = [
-  "bg-[#EDD9EA] text-[#9B5E82]",
-  "bg-[#DBEAFE] text-[#3B82F6]",
-  "bg-[#FEF3C7] text-[#B45309]",
-  "bg-[#D1FAE5] text-[#047857]",
-  "bg-[#FCE7F3] text-[#BE185D]",
-  "bg-[#E0E7FF] text-[#4338CA]",
+/* Tints derived from the plum palette + category swatches */
+const TINTS = [
+  "bg-avatar-1-bg text-avatar-1-fg",
+  "bg-avatar-2-bg text-avatar-2-fg",
+  "bg-avatar-3-bg text-avatar-3-fg",
+  "bg-avatar-4-bg text-avatar-4-fg",
+  "bg-avatar-5-bg text-avatar-5-fg",
 ];
 
-function colorForName(name: string) {
+function tintForName(name: string) {
   const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return COLORS[hash % COLORS.length];
+  return TINTS[hash % TINTS.length];
 }
 
 function initials(name: string) {
@@ -25,14 +25,15 @@ function initials(name: string) {
 
 const sizeClasses = {
   sm: "h-8 w-8 text-xs",
-  md: "h-11 w-11 text-sm",
-  lg: "h-14 w-14 text-lg",
+  md: "h-10 w-10 text-sm",
+  lg: "h-15 w-15 text-xl",
+  xl: "h-18 w-18 text-2xl",
 };
 
 export default function Avatar({ name, size = "md" }: AvatarProps) {
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-semibold ${colorForName(name)} ${sizeClasses[size]}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-display font-bold ${tintForName(name)} ${sizeClasses[size]}`}
       aria-hidden="true"
     >
       {initials(name)}

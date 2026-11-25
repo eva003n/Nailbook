@@ -1,4 +1,4 @@
-import { Calendar, CreditCard, LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
+import { Calendar, CreditCard, House, Settings, Users, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   to: string;
@@ -7,9 +7,9 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/bookings", label: "Bookings", icon: Calendar },
-  { to: "/customers", label: "Customers", icon: Users },
-  { to: "/payments", label: "Payments", icon: CreditCard },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/admin/dashboard", label: "Dashboard", icon: House },
+  { to: "/admin/bookings", label: "Bookings", icon: Calendar },
+  { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/payments", label: "Payments", icon: CreditCard },
+  { to: "/admin/settings", label: "Settings", icon: Settings },
 ];

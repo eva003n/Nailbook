@@ -10,12 +10,14 @@
  * (matching the ServicesSection pattern in settings).
  */
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Users, CirclePlus } from "lucide-react";
+import { Outlet, useMatch, useNavigate } from "react-router-dom";
+import { MousePointerClick, Pencil, Plus, Search, Trash2, Users } from "lucide-react";
+import { clsx } from "clsx";
+import Dialog from "@/components/ui/Dialog";
+import NotificationBell from "@/components/NotificationBell";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageHeader from "@/components/layout/PageHeader";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -30,7 +32,7 @@ import {
   useDeleteCustomer,
 } from "@/hooks/useCustomerMutations";
 import { useUiStore } from "@/store/ui.store";
-import { formatKes, timeAgo } from "@/lib/format";
+import { timeAgo } from "@/lib/format";
 import type { Customer } from "@/lib/schemas";
 import Pagination from "@/components/ui/Pagination";
 
@@ -202,126 +204,138 @@ export default function CustomersListPage() {
 
   // ─── Render ──────────────────────────────────────────────────────────────
 
-  return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title="Customers" />
+  const detailMatch = useMatch("/admin/customers/:id/*");
+  const selectedId = detailMatch?.params.id;
 
-      <div className="px-4 py-4 space-y-4">
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary"
-            aria-hidden="true"
-          />
+  // Group A–Z by first letter for sticky section headers
+  const groups = new Map<string, Customer[]>();
+  for (const c of [...customers].sort((a, b) => a.name.localeCompare(b.name))) {
+    const letter = /[a-z]/i.test(c.name[0] ?? "") ? c.name[0].toUpperCase() : "#";
+    groups.set(letter, [...(groups.get(letter) ?? []), c]);
+  }
+
+  return (
+    <div className="flex min-h-full flex-1">
+      <section
+        className={clsx(
+          "flex w-full flex-col gap-4 px-5 pt-6 pb-6 md:px-8 md:pt-8 lg:w-100 lg:shrink-0 lg:border-r lg:border-line lg:px-6 lg:pt-9",
+          selectedId && "hidden lg:flex",
+        )}
+        aria-label="Customers list"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="font-display text-[1.875rem] leading-9 font-bold tracking-[-0.02em] md:text-[2rem] md:leading-9.5">Customers</h1>
+          <div className="flex items-center gap-2.5">
+            <span className="lg:hidden">
+              <NotificationBell />
+            </span>
+            <Button fullWidth={false} onClick={openAddSheet}>
+              <Plus size={18} aria-hidden="true" />
+              Add
+            </Button>
+          </div>
+        </div>
+
+        <label className="flex h-11 items-center gap-2.5 rounded-(--radius-md) border border-line bg-surface px-3.5 focus-within:border-plum">
+          <Search size={18} className="text-ink-3" aria-hidden="true" />
+          <span className="sr-only">Search customers by name or phone</span>
           <input
             type="search"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name or phone..."
-            aria-label="Search customers by name or phone"
-            className="min-h-11 w-full rounded-[--radius-md] border border-border bg-surface-raised pl-9 pr-3 text-base text-text-primary placeholder:text-text-disabled focus:border-primary focus:outline-none"
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Search by name or phone"
+            className="h-full flex-1 bg-transparent text-[0.9375rem] text-ink placeholder:text-ink-3 focus:outline-none"
           />
-        </div>
+        </label>
 
-        {/* Add button */}
-        <div className="flex justify-end">
-          <Button
-            variant="secondary"
-            onClick={openAddSheet}
-            style={{ width: "auto", padding: "0 var(--space-16)" }}
-          >
-            <CirclePlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-            Add Customer
-          </Button>
-        </div>
-      </div>
-
-      {error ? (
-        <ErrorState
-          message="Couldn't load your clients."
-          onRetry={() => refetch()}
-        />
-      ) : isLoading ? (
-        <div className="divide-y divide-[--color-divider]">
-          <ListRowSkeleton />
-          <ListRowSkeleton />
-          <ListRowSkeleton />
-        </div>
-      ) : customers.length === 0 ? (
-        <EmptyState icon={Users} heading="No customers found" />
-      ) : (
-        <div>
-          <div className="divide-y divide-[--color-divider] px-4">
-            {customers.map((c) => (
-              <div
-                key={c.id}
-                className="flex w-full min-h-11 items-center gap-3 py-3"
-              >
-                <button
-                  onClick={() => navigate(`/customers/${c.id}`)}
-                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                >
-                  <Avatar name={c.name} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-md font-semibold text-text-primary">
-                      {c.name}
-                    </p>
-                    <p className="truncate text-sm text-text-secondary">
-                      {c.phone}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className="text-sm font-medium text-text-primary">
-                      {formatKes(c.totalSpentKes ?? 0)}
-                    </p>
-                    <p className="text-xs text-text-secondary">
-                      {c.lastBookingAt
-                        ? timeAgo(c.lastBookingAt)
-                        : "No visits yet"}
-                    </p>
-                  </div>
-                </button>
-
-                {/* Action buttons */}
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    onClick={() => openEditSheet(c)}
-                    className="flex h-11 w-11 items-center justify-center rounded-[--radius-md] text-sm font-medium text-primary hover:bg-primary-light/20"
-                    aria-label={`Edit ${c.name}`}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => setDeletingCustomer(c)}
-                    className="flex h-11 w-11 items-center justify-center rounded-[--radius-md] text-sm font-medium text-error hover:bg-error/10"
-                    aria-label={`Delete ${c.name}`}
-                  >
-                    Delete
-                  </button>
-                </div>
+        {error ? (
+          <ErrorState heading="Couldn't load customers" message="Check your connection and try again." onRetry={() => refetch()} />
+        ) : isLoading ? (
+          <div className="flex flex-col">
+            <ListRowSkeleton />
+            <ListRowSkeleton />
+            <ListRowSkeleton />
+          </div>
+        ) : customers.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            heading={search ? "No customers match" : "No customers yet"}
+            description={search ? "Try a different name or number." : "They appear after their first website booking, or add one now."}
+          />
+        ) : (
+          <div className="flex flex-col">
+            {[...groups.entries()].map(([letter, list]) => (
+              <div key={letter}>
+                <h2 className="sticky top-0 z-[1] bg-paper px-3 pt-3 pb-1 text-sm font-semibold text-ink-2">{letter}</h2>
+                {list.map((c) => {
+                  const on = c.id === selectedId;
+                  return (
+                    <div key={c.id} className={clsx("flex items-center gap-1 rounded-(--radius-lg) pr-1", on ? "bg-petal" : "hover:bg-surface")}>
+                      <button
+                        onClick={() => navigate(`/admin/customers/${c.id}`)}
+                        aria-current={on ? "true" : undefined}
+                        className="flex min-h-14 min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left"
+                      >
+                        <Avatar name={c.name} size="sm" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[0.9375rem] font-semibold text-ink">{c.name}</span>
+                          <span className="block truncate text-[0.8125rem] text-ink-2">
+                            {c.lastBookingAt ? `Last visit ${timeAgo(c.lastBookingAt)}` : "No visits yet"}
+                          </span>
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => openEditSheet(c)}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-(--radius-md) text-ink-2 hover:bg-petal hover:text-plum-deep"
+                        aria-label={`Edit ${c.name}`}
+                      >
+                        <Pencil size={16} aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingCustomer(c)}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-(--radius-md) text-ink-2 hover:bg-error-bg hover:text-error"
+                        aria-label={`Delete ${c.name}`}
+                      >
+                        <Trash2 size={16} aria-hidden="true" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             ))}
+            {meta && meta.totalPages > 1 && (
+              <div className="pt-4">
+                <Pagination
+                  page={meta.page}
+                  totalPages={meta.totalPages}
+                  onPageChange={setPage}
+                  limit={meta.limit}
+                  onLimitChange={(l) => {
+                    setLimit(l);
+                    setPage(1);
+                  }}
+                />
+              </div>
+            )}
           </div>
-          {meta && (
-            <Pagination
-              page={meta.page}
-              totalPages={meta.totalPages}
-              onPageChange={setPage}
-              limit={meta.limit}
-              onLimitChange={(l) => {
-                setLimit(l);
-                setPage(1);
-              }}
-            />
-          )}
-        </div>
-      )}
+        )}
+      </section>
 
-      {/* ─── Add / Edit Bottom Sheet ─────────────────────────────────────── */}
-      <BottomSheet
-        open={sheetOpen}
-        onClose={closeSheet}
-        title={editingCustomer ? "Edit Customer" : "Add Customer"}
-      >
+      <section className={clsx("min-w-0 flex-1 bg-surface", selectedId ? "flex flex-col" : "hidden lg:flex lg:flex-col")}>
+        {selectedId ? (
+          <Outlet />
+        ) : (
+          <div className="flex flex-1 items-center justify-center">
+            <EmptyState icon={MousePointerClick} heading="Pick a customer" description="Their visits, spend and payments show up here." />
+          </div>
+        )}
+      </section>
+
+      {/* ─── Add / Edit sheet ─────────────────────────────────────── */}
+      <BottomSheet open={sheetOpen} onClose={closeSheet} title={editingCustomer ? "Edit customer" : "Add customer"}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -329,81 +343,37 @@ export default function CustomersListPage() {
           }}
           className="flex flex-col gap-4"
         >
-          <Input
-            label="Full name"
-            type="text"
-            {...register("name")}
-            error={errors.name?.message}
-          />
-
+          <Input label="Full name" type="text" {...register("name")} error={errors.name?.message} />
           <Input
             label="Phone number"
             type="tel"
             inputMode="tel"
-            placeholder="0712345678"
+            placeholder="0712 345 678"
             {...register("phone")}
             error={errors.phone?.message}
           />
-
-          <Input
-            label="Email (optional)"
-            type="email"
-            inputMode="email"
-            {...register("email")}
-            error={errors.email?.message}
-          />
-
-          <div className="flex gap-2">
-            <Button type="submit" loading={isFormPending}>
-              {editingCustomer ? "Save Changes" : "Add Customer"}
-            </Button>
-            <Button variant="secondary" onClick={closeSheet}>
+          <Input label="Email (optional)" type="email" inputMode="email" {...register("email")} error={errors.email?.message} />
+          <div className="mt-2 flex flex-col-reverse gap-2.5 sm:flex-row">
+            <Button variant="secondary" size="lg" className="sm:flex-1" type="button" onClick={closeSheet}>
               Cancel
+            </Button>
+            <Button type="submit" size="lg" className="sm:flex-1" loading={isFormPending}>
+              {editingCustomer ? "Save changes" : "Add customer"}
             </Button>
           </div>
         </form>
       </BottomSheet>
 
-      {/* ─── Delete confirmation dialog ──────────────────────────────────── */}
-      {deletingCustomer && (
-        <dialog
-          open
-          className="fixed inset-0 z-60 m-auto border-none bg-transparent p-0"
-        >
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-[2px]"
-            onClick={() => setDeletingCustomer(null)}
-          />
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-label="Delete customer"
-            className="relative z-10 mx-auto mt-[30vh] max-w-[320px] rounded-[--radius-lg] bg-surface p-6 shadow-[--shadow-modal]"
-          >
-            <p className="m-0 text-[17px] font-semibold text-text-primary">
-              Delete customer?
-            </p>
-            <p className="my-2 text-[15px] text-text-secondary">
-              "{deletingCustomer.name}" will be removed. It cannot be undone.
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                loading={deleteCustomer.isPending}
-                onClick={confirmDelete}
-              >
-                Delete
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => setDeletingCustomer(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </dialog>
-      )}
+      <Dialog
+        open={deletingCustomer !== null}
+        title="Delete customer?"
+        description={deletingCustomer ? `${deletingCustomer.name} will be removed. This can't be undone.` : undefined}
+        confirmLabel="Delete"
+        destructive
+        isConfirming={deleteCustomer.isPending}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingCustomer(null)}
+      />
     </div>
   );
 }

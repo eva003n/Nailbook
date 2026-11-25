@@ -33,7 +33,7 @@ export default function Card({ variant = "standard", children, className, onClic
           : undefined
       }
       className={clsx(
-        "bg-[var(--color-surface)] border border-[var(--color-border)]",
+        "bg-surface border border-line",
         onClick && "cursor-pointer",
         className,
       )}
@@ -43,14 +43,9 @@ export default function Card({ variant = "standard", children, className, onClic
             ? "var(--radius-xl)"
             : variant === "sheet"
               ? "var(--radius-lg) var(--radius-lg) 0 0"
-              : variant === "hero"
-                ? "var(--radius-lg)"
-                : "var(--radius-md)",
-        boxShadow:
-          variant === "sheet"
-            ? "var(--shadow-modal)"
-            : "var(--shadow-card)",
-        padding: "var(--space-16)",
+              : "var(--radius-panel)",
+        boxShadow: variant === "sheet" ? "var(--shadow-modal)" : undefined,
+        padding: variant === "hero" ? "var(--space-24)" : "var(--space-20)",
       }}
     >
       {children}

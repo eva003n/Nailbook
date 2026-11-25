@@ -33,7 +33,7 @@ export default function PublicRoute({ children }: { children: React.ReactNode })
   }
 
   if (status === "authenticated") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <>{children}</>;

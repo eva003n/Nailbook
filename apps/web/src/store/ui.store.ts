@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { applyTheme, readThemePreference, writeThemePreference, type ThemePreference } from "@/lib/theme";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -18,6 +19,9 @@ interface UiState {
 
   installPromptDismissed: boolean;
   setInstallPromptDismissed: (dismissed: boolean) => void;
+
+  theme: ThemePreference;
+  setTheme: (theme: ThemePreference) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -38,4 +42,11 @@ export const useUiStore = create<UiState>((set) => ({
   installPromptDismissed: false,
   setInstallPromptDismissed: (dismissed) =>
     set({ installPromptDismissed: dismissed }),
+
+  theme: readThemePreference(),
+  setTheme: (theme) => {
+    writeThemePreference(theme);
+    applyTheme(theme);
+    set({ theme });
+  },
 }));

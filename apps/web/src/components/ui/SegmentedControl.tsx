@@ -20,7 +20,7 @@ export default function SegmentedControl<T extends string>({
     <div
       role="tablist"
       aria-label={rest["aria-label"]}
-      className="inline-flex rounded-[--radius-md] bg-surface-raised p-1"
+      className="inline-flex gap-0.5 rounded-(--radius-md) bg-petal p-1"
     >
       {options.map((opt) => (
         <button
@@ -29,8 +29,8 @@ export default function SegmentedControl<T extends string>({
           aria-selected={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={`
-            min-h-9 rounded-[--radius-sm] px-4 text-sm font-medium transition-colors
-            ${value === opt.value ? "bg-surface text-text-primary shadow-[--shadow-card]" : "text-text-secondary"}
+            min-h-9 rounded-[9px] px-4 text-sm font-semibold transition-colors
+            ${value === opt.value ? "bg-surface text-ink shadow-(--shadow-seg)" : "text-ink-2 hover:text-ink"}
           `}
         >
           {opt.label}

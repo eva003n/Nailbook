@@ -12,11 +12,11 @@ export default defineConfig({
       strategies: "injectManifest", // need for custom push event handling
       srcDir: "src",
       filename: "sw.ts",
-      registerType: "prompt",
+      registerType: "autoUpdate",
       injectRegister: false,
 
       injectManifest: {
-        globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
       },
       showMaximumFileSizeToCacheInBytesWarning: true,
@@ -31,12 +31,12 @@ export default defineConfig({
         //display_override: ["window-controls-overlay"], // make the app more native by inserting app content in title bar
         display: "standalone",
         orientation: "portrait",
-        theme_color: "#000000",
-        background_color: "#000000",
+        theme_color: "#FBF8F9",
+        background_color: "#FBF8F9",
         lang: "en-KE",
         categories: ["business", "lifestyle"],
-        start_url: "/",
-        scope: "/",
+        start_url: "/admin/dashboard",
+        scope: "/admin/",
         launch_handler: {
           client_mode: "focus-existing",
         },
@@ -102,7 +102,7 @@ export default defineConfig({
         shortcuts: [
           {
             name: "Dashboard",
-            url: "/dashboard",
+            url: "/admin/dashboard",
             icons: [
               {
                 src: "/icons/shortcuts/layout-dashboard-96x96.png",
@@ -113,7 +113,7 @@ export default defineConfig({
           },
           {
             name: "Bookings",
-            url: "/bookings",
+            url: "/admin/bookings",
             icons: [
               {
                 src: "/icons/shortcuts/calendar-96x96.png",
@@ -124,7 +124,7 @@ export default defineConfig({
           },
           {
             name: "Payments",
-            url: "/payments",
+            url: "/admin/payments",
             icons: [
               {
                 src: "/icons/shortcuts/credit-card-96x96.png",
@@ -135,7 +135,7 @@ export default defineConfig({
           },
           {
             name: "Customers",
-            url: "/customers",
+            url: "/admin/customers",
             icons: [
               {
                 src: "/icons/shortcuts/users-96x96.png",
@@ -146,7 +146,7 @@ export default defineConfig({
           },
           {
             name: "Settings",
-            url: "/settings",
+            url: "/admin/settings",
             icons: [
               {
                 src: "/icons/shortcuts/settings-96x96.png",

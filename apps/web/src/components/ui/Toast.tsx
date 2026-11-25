@@ -25,7 +25,7 @@ export default function ToastContainer() {
     <div
       aria-live="polite"
       aria-atomic="true"
-      className="fixed bottom-[calc(64px+env(safe-area-inset-bottom)+8px)] left-4 right-4 z-50 flex flex-col items-center"
+      className="fixed bottom-[calc(84px+env(safe-area-inset-bottom)+8px)] left-4 right-4 z-50 flex flex-col items-center md:bottom-6 md:left-auto md:right-6 md:w-md"
     >
       {toasts.map((toast) => (
         <ToastItem
@@ -43,11 +43,12 @@ interface ToastItemProps {
   onDismiss: () => void;
 }
 
+/* Ink toast; the icon carries the status colour */
 const toastConfig: Record<ToastItem["type"], string> = {
-  success: "bg-success-bg border-success text-success",
-  error: "bg-error-bg border-error text-error",
-  info: "bg-info-bg border-info text-info",
-  warning: "bg-warning-bg border-warning text-warning",
+  success: "[&>svg]:text-[#8FD9AB]",
+  error: "[&>svg]:text-[#F5A59D]",
+  info: "[&>svg]:text-[#A9C7F5]",
+  warning: "[&>svg]:text-[#F5C97A]",
 };
 
 const toastIcons: Record<ToastItem["type"], React.ComponentType<{ size?: number; className?: string }>> = {
@@ -79,10 +80,10 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
       role={isError ? "alert" : "status"}
       aria-live={isError ? "assertive" : "polite"}
       className={clsx(
-        "flex w-full items-center gap-3",
-        "border rounded-[--radius-md]",
-        "px-4 py-3",
-        "shadow-[--shadow-raised]",
+        "flex w-full max-w-md items-center gap-3 border border-toast-line bg-toast text-white",
+        "rounded-(--radius-lg)",
+        "min-h-14 px-4 py-3",
+        "shadow-(--shadow-raised)",
         "animate-slide-up",
         toastConfig[toast.type],
       )}
@@ -95,8 +96,8 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         marginBottom: "8px",
       }}
     >
-      <Icon size={16} className="shrink-0" />
-      <p className="text-sm font-medium">{toast.message}</p>
+      <Icon size={18} className="shrink-0" />
+      <p className="text-[0.9375rem] font-medium">{toast.message}</p>
     </div>
   );
 }

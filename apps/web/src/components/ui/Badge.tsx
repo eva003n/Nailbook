@@ -1,18 +1,18 @@
 /**
- * §4.2 Status Badge Specification
- *
- * Pill-shaped. Background is always the *-bg tint of the status colour.
- * Text is the status colour. Never background = status colour (too harsh).
- * Always include aria-label — colour is not the only indicator.
- * Use Lucide React icons only, never emoji.
+ * Status badge — pill with icon + text on a light tint.
+ * Colour is never the only signal: every badge has a text label and aria-label.
  */
 import { clsx } from "clsx";
 import {
+  BadgeCheck,
   CheckCircle2,
   Clock,
+  CreditCard,
+  RefreshCw,
+  Star,
   XCircle,
-  BadgeCheck,
   CalendarOff,
+  type LucideIcon,
 } from "lucide-react";
 
 type BadgeVariant = "success" | "warning" | "error" | "neutral" | "info";
@@ -23,93 +23,77 @@ interface BadgeProps {
   className?: string;
   ariaLabel?: string;
   icon?: boolean;
-  /** Shorthand: derive variant & label from a booking status */
-  kind?: "booking";
+  /** Shorthand: derive variant, label and icon from a booking or payment status */
+  kind?: "booking" | "payment";
   status?: string;
 }
 
-/* §4.2 exact token mappings */
-const variantStyles: Record<BadgeVariant, { bg: string; text: string }> = {
-  success: {
-    bg: "bg-success-bg",
-    text: "text-success",
-  },
-  warning: {
-    bg: "bg-warning-bg",
-    text: "text-warning",
-  },
-  error: {
-    bg: "bg-error-bg",
-    text: "text-error",
-  },
-  neutral: {
-    bg: "bg-gray-100",
-    text: "text-gray-400",
-  },
-  info: {
-    bg: "bg-info-bg",
-    text: "text-info",
-  },
+const variantStyles: Record<BadgeVariant, string> = {
+  success: "bg-success-bg text-success",
+  warning: "bg-warning-bg text-warning",
+  error: "bg-error-bg text-error",
+  neutral: "bg-surface-raised text-ink-2",
+  info: "bg-info-bg text-info",
 };
 
-/**
- * Map raw booking status strings to badge variants for convenience.
- * Returns the variant and the human-readable label.
- */
-// eslint-disable-next-line react-refresh/only-export-components
-export function bookingStatusToBadge(status: string): {
-  variant: BadgeVariant;
-  label: string;
-} {
-  switch (status) {
-    case "PENDING":
-      return { variant: "warning", label: "Pending" };
-    case "APPROVED":
-      return { variant: "info", label: "Confirmed" };
-    case "PAYMENT_PENDING":
-      return { variant: "warning", label: "Awaiting Payment" };
-    case "PAYMENT_COMPLETED":
-      return { variant: "success", label: "Paid" };
-    case "CANCELLED":
-    case "NO_SHOW":
-      return { variant: "neutral", label: "No show" };
-    case "COMPLETED":
-      return { variant: "success", label: "Completed" };
-    case "RESCHEDULED":
-      return { variant: "info", label: "Rescheduled" };
-    case "IN_PROGRESS":
-      return { variant: "info", label: "In Progress" };
-    default:
-      return { variant: "warning", label: status };
-  }
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function paymentStatusToBadge(status: string): {
-  variant: BadgeVariant;
-  label: string;
-} {
-  switch (status) {
-    case "PAID":
-      return { variant: "success", label: "Paid" };
-    case "PAYMENT_PENDING":
-      return { variant: "warning", label: "Pending" };
-    case "PAYMENT_FAILED":
-      return { variant: "error", label: "Failed" };
-    case "REFUNDED":
-      return { variant: "info", label: "Refunded" };
-    default:
-      return { variant: "warning", label: status };
-  }
-}
-
-const iconMap: Record<BadgeVariant, React.ComponentType<{ size?: number }>> = {
+const variantIcons: Record<BadgeVariant, LucideIcon> = {
   success: BadgeCheck,
   warning: Clock,
   error: XCircle,
   neutral: CalendarOff,
   info: CheckCircle2,
 };
+
+interface StatusDisplay {
+  variant: BadgeVariant;
+  label: string;
+  icon: LucideIcon;
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function bookingStatusToBadge(status: string): StatusDisplay {
+  switch (status) {
+    case "PENDING":
+      return { variant: "warning", label: "Pending", icon: Clock };
+    case "APPROVED":
+      return { variant: "info", label: "Confirmed", icon: CheckCircle2 };
+    case "RESCHEDULED":
+      return { variant: "info", label: "Rescheduled", icon: RefreshCw };
+    case "COMPLETED":
+      return { variant: "success", label: "Completed", icon: Star };
+    case "CANCELLED":
+      return { variant: "error", label: "Cancelled", icon: XCircle };
+    case "NO_SHOW":
+      return { variant: "neutral", label: "No-show", icon: CalendarOff };
+    default:
+      return { variant: "neutral", label: status, icon: Clock };
+  }
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function paymentStatusToBadge(status: string): StatusDisplay {
+  switch (status) {
+    case "SUCCESS":
+      return { variant: "success", label: "Paid", icon: BadgeCheck };
+    case "PENDING":
+      return { variant: "warning", label: "Awaiting payment", icon: CreditCard };
+    case "RECONCILING":
+      return { variant: "warning", label: "Checking payment", icon: Clock };
+    case "FAILED":
+      return { variant: "error", label: "Failed", icon: XCircle };
+    case "CANCELLED":
+      return { variant: "error", label: "Cancelled", icon: XCircle };
+    case "EXPIRED":
+      return { variant: "neutral", label: "Request expired", icon: Clock };
+    case "REFUNDED":
+      return { variant: "info", label: "Refunded", icon: RefreshCw };
+    default:
+      return { variant: "neutral", label: status, icon: CreditCard };
+  }
+}
+
+const base =
+  "inline-flex h-6.5 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full pl-2 pr-2.5 text-[0.8125rem] font-semibold";
 
 export default function Badge({
   variant = "warning",
@@ -120,101 +104,25 @@ export default function Badge({
   kind,
   status,
 }: BadgeProps) {
-  /* When used as a shorthand booking-status badge */
-  if (kind === "booking" && status) {
-    const { variant: v, label } = bookingStatusToBadge(status);
-    const styles = variantStyles[v];
-    const Icon = iconMap[v];
+  if (kind && status) {
+    const d = kind === "booking" ? bookingStatusToBadge(status) : paymentStatusToBadge(status);
+    const Icon = d.icon;
     return (
-      <span
-        className={clsx(
-          "inline-flex items-center gap-1",
-          styles.bg,
-          styles.text,
-          "text-xs font-medium px-2 py-1 rounded-[--radius-sm]",
-          className,
-        )}
-        aria-label={ariaLabel || `Status: ${label}`}
-      >
-        <Icon size={12} />
-        {label}
+      <span className={clsx(base, variantStyles[d.variant], className)} aria-label={ariaLabel || `Status: ${d.label}`}>
+        <Icon size={14} strokeWidth={2.2} aria-hidden="true" />
+        {d.label}
       </span>
     );
   }
 
-  const styles = variantStyles[variant];
-  const Icon = iconMap[variant];
-
+  const Icon = variantIcons[variant];
   return (
     <span
-      className={clsx(
-        "inline-flex items-center gap-1 ",
-        styles.bg,
-        styles.text,
-        "text-xs font-medium px-2 py-1 rounded-[--radius-sm]",
-        className,
-      )}
-      aria-label={ariaLabel || `Status: ${children}`}
+      className={clsx(base, variantStyles[variant], className)}
+      aria-label={ariaLabel || (typeof children === "string" ? `Status: ${children}` : undefined)}
     >
-      {icon && <Icon size={12} />}
+      {icon && <Icon size={14} strokeWidth={2.2} aria-hidden="true" />}
       {children}
     </span>
   );
 }
-
-/* 
-
-import { BadgeCheck, CheckCircle, Clock, CreditCard, RefreshCw, Star, XCircle, type LucideIcon } from "lucide-react";
-import type { BookingStatus, PaymentStatus } from "@/lib/schemas";
-
-interface StatusConfig {
-  label: string;
-  icon: LucideIcon;
-  text: string;
-  bg: string;
-}
-
-const bookingStatusConfig: Record<BookingStatus, StatusConfig> = {
-  PENDING: { label: "Pending", icon: Clock, text: "text-warning", bg: "bg-warning-bg" },
-  APPROVED: { label: "Confirmed", icon: CheckCircle, text: "text-info", bg: "bg-info-bg" },
-  RESCHEDULED: { label: "Rescheduled", icon: RefreshCw, text: "text-info", bg: "bg-info-bg" },
-  CANCELLED: { label: "Cancelled", icon: XCircle, text: "text-error", bg: "bg-error-bg" },
-  COMPLETED: { label: "Completed", icon: Star, text: "text-success", bg: "bg-success-bg" },
-  NO_SHOW: { label: "No-show", icon: XCircle, text: "text-error", bg: "bg-error-bg" },
-};
-
-const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
-  UNPAID: { label: "Awaiting Payment", icon: CreditCard, text: "text-warning", bg: "bg-warning-bg" },
-  PAYMENT_PENDING: { label: "Awaiting Payment", icon: CreditCard, text: "text-warning", bg: "bg-warning-bg" },
-  PAID: { label: "Paid", icon: BadgeCheck, text: "text-success", bg: "bg-success-bg" },
-  PAYMENT_FAILED: { label: "Payment Failed", icon: XCircle, text: "text-error", bg: "bg-error-bg" },
-  REFUNDED: { label: "Refunded", icon: RefreshCw, text: "text-text-secondary", bg: "bg-surface-raised" },
-};
-
-interface BadgeProps {
-  kind: "booking" | "payment";
-  status: BookingStatus | PaymentStatus;
-  className?: string;
-}
-
-export default function Badge({ kind, status, className = "" }: BadgeProps) {
-  const config =
-    kind === "booking"
-      ? bookingStatusConfig[status as BookingStatus]
-      : paymentStatusConfig[status as PaymentStatus];
-
-  if (!config) return null;
-  const Icon = config.icon;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-[--radius-sm] px-2 py-1 text-2xs font-medium ${config.bg} ${config.text} ${className}`}
-      aria-label={`Status: ${config.label}`}
-    >
-      <Icon className="h-3 w-3" aria-hidden="true" />
-      {config.label}
-    </span>
-  );
-}
-
-*/

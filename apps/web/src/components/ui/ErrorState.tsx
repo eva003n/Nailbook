@@ -35,19 +35,19 @@ export default function ErrorState({
       />
 
       {/* §7.3 Heading */}
-      <h3 className="text-lg font-semibold text-text-primary mt-4 mb-2">
+      <h3 className="font-display text-xl font-semibold tracking-[-0.01em] text-ink mt-4 mb-2">
         {heading}
       </h3>
 
       {/* §7.3 Body */}
-      <p className="text-base text-text-secondary max-w-xs mb-6">
+      <p className="text-[0.9375rem] leading-5.5 text-ink-2 max-w-xs mb-6">
         {message}
       </p>
 
       {/* §7.3 Retry CTA — --btn-primary, full width */}
       {onRetry && (
         <div className="w-full max-w-[320px]">
-          <Button onClick={onRetry}>Try Again</Button>
+          <Button onClick={onRetry}>Try again</Button>
         </div>
       )}
     </div>

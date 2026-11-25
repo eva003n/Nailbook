@@ -17,10 +17,12 @@ export default function EmptyState({
   // if (typeof icon === "function") {
     return (
       <div className="flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
-        <Icon className="h-12 w-12 text-text-disabled" aria-hidden="true" />
-        <h3 className="text-lg font-semibold text-text-primary">{heading}</h3>
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-petal">
+          <Icon className="h-7 w-7 text-plum" aria-hidden="true" />
+        </span>
+        <h3 className="font-display text-xl font-semibold tracking-[-0.01em] text-ink">{heading}</h3>
         {description && (
-          <p className="max-w-xs text-base text-text-secondary">{description}</p>
+          <p className="max-w-xs text-[0.9375rem] leading-5.5 text-ink-2">{description}</p>
         )}
         {action}
       </div>

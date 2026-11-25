@@ -21,14 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="flex flex-col">
         <label
           htmlFor={inputId}
-          className="mb-1 font-medium"
-          style={{
-            fontSize: "13px",
-            lineHeight: "18px",
-            letterSpacing: "0.1px",
-            fontWeight: 500,
-            color: "var(--color-text-secondary)",
-          }}
+          className="mb-1.5 text-sm font-semibold text-ink"
         >
           {label}
         </label>

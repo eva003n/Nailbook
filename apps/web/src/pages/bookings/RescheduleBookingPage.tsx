@@ -6,7 +6,9 @@ import Button from "@/components/ui/Button";
 import { useBooking, useRescheduleBooking } from "@/pages/bookings/hooks/useBookings";
 import { useAvailableSlots } from "@/hooks/useServices";
 import { useUiStore } from "@/store/ui.store";
-import { formatTime } from "@/lib/format";
+import { formatDate, formatTime } from "@/lib/format";
+import { DateStrip, SlotGrid } from "@/pages/bookings/components/SlotPicker";
+import { nextDays } from "@/pages/bookings/components/dateOptions";
 
 export default function RescheduleBookingPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,20 +31,9 @@ export default function RescheduleBookingPage() {
   const slotsArray: { time: string; available: boolean; appointmentAt: string }[] = slots ?? [];
   const rescheduleMutation = useRescheduleBooking();
 
-  const dateOptions = useMemo(() => {
-    const days: { iso: string; label: string }[] = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      days.push({
-        iso: d.toISOString().slice(0, 10),
-        label: d.toLocaleDateString("en-KE", { weekday: "short", day: "numeric" }),
-      });
-    }
-    return days;
-  }, []);
+  const dateOptions = useMemo(() => nextDays(14), []);
 
-  const handleClose = () => navigate(`/bookings/${id}`);
+  const handleClose = () => navigate(`/admin/bookings/${id}`);
 
   const handleConfirm = () => {
     if (!selectedSlot) return;
@@ -65,57 +56,35 @@ export default function RescheduleBookingPage() {
 
   return (
     <>
-      <BottomSheet open title="Reschedule" onClose={handleClose}>
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {dateOptions.map((d) => (
-              <button
-                key={d.iso}
-                onClick={() => {
-                  setSelectedDate(d.iso);
-                  setSelectedSlot(null);
-                }}
-                className={`min-h-11 shrink-0 rounded-[--radius-md] px-4 text-sm font-medium ${
-                  selectedDate === d.iso ? "bg-primary text-white" : "bg-surface-raised text-text-primary"
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-
-          {slotsLoading ? (
-            <p className="text-sm text-text-secondary">Loading slots…</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {slotsArray.map((slot) => (
-                <button
-                  key={slot.time}
-                  disabled={!slot.available}
-                  onClick={() => setSelectedSlot(slot.appointmentAt)}
-                  className={`min-h-11 rounded-[--radius-md] text-sm font-medium disabled:opacity-40 ${
-                    selectedSlot === slot.appointmentAt
-                      ? "bg-primary text-white"
-                      : "bg-surface-raised text-text-primary"
-                  }`}
-                >
-                  {slot.time}
-                </button>
-              ))}
-            </div>
+      <BottomSheet open title="Reschedule booking" onClose={handleClose}>
+        <div className="flex flex-col gap-4">
+          {booking && (
+            <p className="text-[0.9375rem] text-ink-2">
+              Now {new Date(booking.appointmentAt).toLocaleDateString("en-KE", { weekday: "short", day: "numeric", month: "short" })} at{" "}
+              {formatTime(booking.appointmentAt)}. Pick a new day and time for {booking.customer.name.split(" ")[0]}.
+            </p>
           )}
-
-          <Button  disabled={!selectedSlot} onClick={() => setConfirmOpen(true)}>
-            Confirm Reschedule
+          <DateStrip
+            days={dateOptions}
+            value={selectedDate}
+            onChange={(iso) => {
+              setSelectedDate(iso);
+              setSelectedSlot(null);
+            }}
+          />
+          <SlotGrid slots={slotsArray} value={selectedSlot} onChange={setSelectedSlot} loading={slotsLoading} />
+          <Button size="lg" disabled={!selectedSlot} onClick={() => setConfirmOpen(true)}>
+            {selectedSlot ? `Move to ${formatTime(selectedSlot)}` : "Pick a time"}
           </Button>
         </div>
       </BottomSheet>
 
       <Dialog
         open={confirmOpen}
-        title="Confirm reschedule?"
-        description={selectedSlot ? `Reschedule to ${formatTime(selectedSlot)}?` : undefined}
-        confirmLabel="Confirm"
+        title="Reschedule booking?"
+        description={selectedSlot ? `Move to ${formatDate(selectedSlot)} at ${formatTime(selectedSlot)}. The customer is told on WhatsApp.` : undefined}
+        confirmLabel="Reschedule"
+        cancelLabel="Back"
         isConfirming={rescheduleMutation.isPending}
         onConfirm={handleConfirm}
         onCancel={() => setConfirmOpen(false)}

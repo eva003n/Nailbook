@@ -33,7 +33,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                 this.setState({ hasError: false, error: null });
                 window.location.reload();
               }}
-              className="mt-4 min-h-11 min-w-11 rounded-[--radius-lg] bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+              className="mt-4 min-h-11 min-w-11 rounded-(--radius-lg) bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
             >
               Reload page
             </button>

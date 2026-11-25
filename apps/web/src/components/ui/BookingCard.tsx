@@ -1,36 +1,47 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, RefreshCw, X } from "lucide-react";
+import { clsx } from "clsx";
 import Avatar from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
+import NailSwatch from "@/components/ui/NailSwatch";
 import type { Booking } from "@/lib/schemas";
 import { formatTime } from "@/lib/format";
+import { bookingServiceLabel } from "@/lib/serviceCategory";
 
 interface BookingCardProps {
   booking: Booking;
   onApprove?: (id: string) => void;
   onReschedule?: (id: string) => void;
   onCancel?: (id: string) => void;
+  /** Highlights the row (list/detail selection) */
+  selected?: boolean;
+  /** Category swatch colour; when set, replaces the avatar with a tall nail swatch */
+  swatchColor?: string;
+  /** Show payment status badge instead of booking status */
+  showPayment?: boolean;
 }
 
-export default function BookingCard({ booking, onApprove, onReschedule, onCancel }: BookingCardProps) {
+/**
+ * Booking row: avatar (or swatch), customer, service, time + status.
+ * On touch devices, swipe left reveals Approve / Move / Cancel.
+ */
+export default function BookingCard({
+  booking,
+  onApprove,
+  onReschedule,
+  onCancel,
+  selected,
+  swatchColor,
+  showPayment,
+}: BookingCardProps) {
   const navigate = useNavigate();
   const startX = useRef<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
 
-  const serviceNames = useMemo(() => {
-    if (booking.service?.name) return booking.service.name;
-    if (booking.services && booking.services.length > 0) {
-      return booking.services[0].service.name + (booking.services.length > 1 ? ` +${booking.services.length - 1} more` : "");
-    }
-    return "Nail Service";
-  }, [booking]);
-
   const canApprove = booking.status === "PENDING" && onApprove;
-  const canReschedule =
-    (booking.status === "PENDING" || booking.status === "APPROVED") && onReschedule;
-  const canCancel =
-    (booking.status === "PENDING" || booking.status === "APPROVED") && onCancel;
+  const canReschedule = (booking.status === "PENDING" || booking.status === "APPROVED") && onReschedule;
+  const canCancel = (booking.status === "PENDING" || booking.status === "APPROVED") && onCancel;
 
   const hasActions = canApprove || canReschedule || canCancel;
   const actionWidth = [canApprove, canReschedule, canCancel].filter(Boolean).length * 64;
@@ -45,16 +56,12 @@ export default function BookingCard({ booking, onApprove, onReschedule, onCancel
     if (delta < 0) setSwipeOffset(Math.max(delta, -actionWidth));
   };
   const handleTouchEnd = () => {
-    if (swipeOffset < -actionWidth / 2) {
-      setSwipeOffset(-actionWidth);
-    } else {
-      setSwipeOffset(0);
-    }
+    setSwipeOffset(swipeOffset < -actionWidth / 2 ? -actionWidth : 0);
     startX.current = null;
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[--radius-md]">
+    <div className="relative overflow-hidden rounded-(--radius-lg)">
       {hasActions && (
         <div className="absolute inset-y-0 right-0 flex">
           {canApprove && (
@@ -63,11 +70,11 @@ export default function BookingCard({ booking, onApprove, onReschedule, onCancel
                 onApprove(booking.id);
                 setSwipeOffset(0);
               }}
-              className="flex w-16 flex-col items-center justify-center gap-1 bg-success text-white"
+              className="flex w-16 flex-col items-center justify-center gap-1 bg-plum text-white"
               aria-label={`Approve booking for ${booking.customer.name}`}
             >
               <Check className="h-5 w-5" aria-hidden="true" />
-              <span className="text-2xs">Approve</span>
+              <span className="text-2xs font-semibold">Approve</span>
             </button>
           )}
           {canReschedule && (
@@ -80,7 +87,7 @@ export default function BookingCard({ booking, onApprove, onReschedule, onCancel
               aria-label={`Reschedule booking for ${booking.customer.name}`}
             >
               <RefreshCw className="h-5 w-5" aria-hidden="true" />
-              <span className="text-2xs">Move</span>
+              <span className="text-2xs font-semibold">Move</span>
             </button>
           )}
           {canCancel && (
@@ -93,7 +100,7 @@ export default function BookingCard({ booking, onApprove, onReschedule, onCancel
               aria-label={`Cancel booking for ${booking.customer.name}`}
             >
               <X className="h-5 w-5" aria-hidden="true" />
-              <span className="text-2xs">Cancel</span>
+              <span className="text-2xs font-semibold">Cancel</span>
             </button>
           )}
         </div>
@@ -105,22 +112,30 @@ export default function BookingCard({ booking, onApprove, onReschedule, onCancel
             setSwipeOffset(0);
             return;
           }
-          navigate(`/bookings/${booking.id}`);
+          navigate(`/admin/bookings/${booking.id}`);
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{ transform: `translateX(${swipeOffset}px)` }}
-        className="relative flex w-full items-center gap-3 bg-surface p-4 text-left shadow-[--shadow-card] transition-transform"
+        aria-current={selected ? "true" : undefined}
+        className={clsx(
+          "relative flex w-full items-center gap-3.5 p-3 text-left transition-[transform,background-color]",
+          selected ? "bg-petal" : "bg-surface hover:bg-paper md:bg-transparent md:hover:bg-surface",
+        )}
       >
-        <Avatar name={booking.customer.name} />
+        {swatchColor ? <NailSwatch color={swatchColor} width={12} height={40} /> : <Avatar name={booking.customer.name} />}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-md font-semibold text-text-primary">{booking.customer.name}</p>
-          <p className="truncate text-sm text-text-secondary">{serviceNames}</p>
+          <p className="truncate text-base leading-5.5 font-semibold text-ink">{booking.customer.name}</p>
+          <p className="truncate text-sm leading-5 text-ink-2">{bookingServiceLabel(booking)}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <span className="text-base text-text-primary">{formatTime(booking.appointmentAt)}</span>
-          <Badge kind="booking" status={booking.status} />
+          <span className="text-[0.9375rem] font-semibold text-ink tabular-nums">{formatTime(booking.appointmentAt)}</span>
+          {showPayment ? (
+            <Badge kind="payment" status={booking.paymentStatus} />
+          ) : (
+            <Badge kind="booking" status={booking.status} />
+          )}
         </div>
       </button>
     </div>

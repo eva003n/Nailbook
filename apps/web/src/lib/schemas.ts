@@ -296,3 +296,31 @@ export type BookingFilters = {
   page?: number;
   limit?: number;
 };
+// ─── Public website (unauthenticated /public endpoints) ─────────────────────
+
+/** Category is a plain string here: the API may return categories the staff app hides. */
+export const PublicServiceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  category: z.string(),
+  priceKes: z.number().int().nonnegative(),
+  durationMinutes: z.number().int().positive(),
+});
+export type PublicService = z.infer<typeof PublicServiceSchema>;
+
+export const PublicBookingCreatedSchema = z.object({
+  reference: z.string(),
+  status: z.string(),
+  appointmentAt: z.string(),
+  durationMinutes: z.number().int(),
+  priceKes: z.number().int(),
+  services: z.array(z.object({ name: z.string() })),
+});
+export type PublicBookingCreated = z.infer<typeof PublicBookingCreatedSchema>;
+
+export const PublicBookingSchema = PublicBookingCreatedSchema.extend({
+  paymentStatus: z.string(),
+  canPay: z.boolean(),
+});
+export type PublicBooking = z.infer<typeof PublicBookingSchema>;

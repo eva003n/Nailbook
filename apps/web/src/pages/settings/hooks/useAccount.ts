@@ -24,7 +24,7 @@ export function useLogout() {
         // Clear state regardless
       }
       clearAuth();
-      navigate("/login", { replace: true });
+      navigate("/admin/login", { replace: true });
     },
   };
 }

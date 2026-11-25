@@ -3,7 +3,7 @@ export function formatKes(amount: number): string {
 }
 
 export function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("en-KE", { hour: "numeric", minute: "2-digit", hour12: true });
+  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 }
 
 export function formatDate(iso: string): string {
@@ -24,6 +24,14 @@ export function isSameDay(isoA: string, isoB: string): boolean {
 
 export function isToday(iso: string): boolean {
   return isSameDay(iso, new Date().toISOString());
+}
+
+/** "254712345678" / "0712345678" → "+254 712 345 678" (falls back to the input). */
+export function formatPhone(phone: string): string {
+  const digits = phone.replace(/[^0-9]/g, "");
+  const local = digits.startsWith("254") ? digits.slice(3) : digits.startsWith("0") ? digits.slice(1) : digits;
+  if (local.length !== 9) return phone;
+  return `+254 ${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}`;
 }
 
 export function formatPhoneForWhatsApp(phone: string): string {

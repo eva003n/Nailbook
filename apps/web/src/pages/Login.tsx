@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth.store";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { Sparkles } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import Logo from "@/components/layout/Logo";
 import {z} from "zod"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +23,7 @@ type LoginData = z.infer<typeof loginFormSchema>
 
 export default function Login() {
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -37,117 +39,60 @@ export default function Login() {
 
     try {
       await login(data.email, data.password);
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
-      setError(axiosErr.response?.data?.error?.message ?? "Login failed. Check your credentials.");
+      setError(axiosErr.response?.data?.error?.message ?? "Couldn't sign in. Check your email and password.");
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "var(--color-canvas)",
-        padding: "var(--space-16)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
-          maxWidth: 480,
-          background: "var(--color-surface)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--space-32)",
-          boxShadow: "var(--shadow-modal)",
-        }}
-      >
-        <div className="flex  h-16 w-16 items-center justify-center rounded-md bg-primary-light text-primary text-center">
-          <Sparkles className="h-8 w-8 " aria-hidden="true" />
-        </div>
-        {/* §9.1 Brand */}
-        <h1
-          style={{
-            fontSize: "28px",
-            lineHeight: "34px",
-            letterSpacing: "-0.3px",
-            fontWeight: 700,
-            color: "var(--color-text-primary)",
-            textAlign: "center",
-            margin: "0 0 var(--space-8)",
-          }}
-        >
-          Nailbook
-        </h1>
-        <p
-          style={{
-            fontSize: "16px",
-            lineHeight: "22px",
-            color: "var(--color-text-secondary)",
-            textAlign: "center",
-            margin: "0 0 var(--space-32)",
-          }}
-        >
-          Sign in to your account
-        </p>
+    <div className="flex min-h-dvh bg-paper text-ink">
+      <main className="flex flex-1 flex-col px-6 pt-[calc(env(safe-area-inset-top)+40px)] pb-[calc(env(safe-area-inset-bottom)+32px)] md:items-center md:justify-center md:py-16">
+        <div className="flex w-full max-w-100 flex-1 flex-col md:flex-none">
+          <Logo size={28} />
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-20)",
-          }}
-          noValidate
-        >
-          {/* §7.3 Error display */}
-          {error && (
-            <div
-              role="alert"
-              style={{
-                background: "var(--color-error-bg)",
-                color: "var(--color-error)",
-                borderRadius: "var(--radius-sm)",
-                padding: "var(--space-12) var(--space-16)",
-                fontSize: "14px",
-                lineHeight: "20px",
-              }}
-            >
-              {error}
+          <h1 className="mt-14 font-display text-[2.125rem] leading-9.5 font-bold tracking-[-0.02em] md:mt-12">Sign in to your salon</h1>
+          <p className="mt-2.5 text-base leading-6 text-ink-2">Approve bookings and track M-Pesa payments from one place.</p>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-9 flex flex-1 flex-col gap-4.5" noValidate>
+            {error && (
+              <div role="alert" className="rounded-(--radius-md) bg-error-bg px-4 py-3 text-sm leading-5 font-medium text-error">
+                {error}
+              </div>
+            )}
+
+            <Input label="Email" type="email" {...register("email")} error={errors.email?.message} required autoComplete="email" inputMode="email" />
+
+            <div className="relative">
+              <Input
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                {...register("password")}
+                error={errors.password?.message}
+                required
+                autoComplete="current-password"
+                className="w-full pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute top-7 right-1 flex h-11 w-11 items-center justify-center rounded-(--radius-md) text-ink-2 hover:text-plum-deep"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+              </button>
             </div>
-          )}
 
-          {/* §6.1 Email input with label above */}
-          <Input
-            label="Email"
-            type="email"
-            {...register("email")}
-            error={errors.email?.message}
-            required
-            autoComplete="email"
-          />
-
-          {/* §6.1 Password input with label above */}
-          <Input
-            label="Password"
-            type="password"
-            {...register("password")}
-            error={errors.password?.message}
-            required
-            autoComplete="current-password"
-          />
-
-          <Button type="submit" loading={isLoading}>
-            Sign In
-          </Button>
-        </form>
-      </div>
+            <div className="mt-auto pt-6 md:mt-4 md:pt-0">
+              <Button type="submit" size="lg" loading={isLoading}>
+                Sign in
+              </Button>
+            </div>
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

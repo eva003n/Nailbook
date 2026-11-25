@@ -1,14 +1,6 @@
 /**
- * Settings Page — §6.1 §3.3 UI/UX Spec
- *
- * Grouped list rendered as <section> blocks with headings:
- * 1. Business — name, address, phone, logo upload
- * 2. Hours — day-of-week toggles with open/close time pickers
- * 3. Services — CRUD list, drag-to-reorder, grouped by categories
- * 4. Reminders — toggles for 24h / 1h, editable message preview
- * 5. WhatsApp — read-only config display, template approval status
- * 6. M-Pesa — read-only shortcode
- * 7. Account — change password, logout
+ * Settings — grouped sections. Desktop shows a sticky section menu on the
+ * left that jumps to each section; mobile stacks the sections.
  */
 import PageHeader from "@/components/layout/PageHeader";
 import BusinessSection from "./sections/BusinessSection";
@@ -20,30 +12,25 @@ import MPesaSection from "./sections/MPesaSection";
 import AccountSection from "./sections/AccountSection";
 import { NotificationSection } from "./sections/NotificationSection";
 import { AppInstallSection } from "./sections/AppInstallSection";
+import { AppearanceSection } from "./sections/AppearanceSection";
 import { useInstallPromptContext } from "@/hooks/useInstallPrompt";
 
 interface SectionProps {
+  id: string;
   title: string;
+  description?: string;
   children: React.ReactNode;
 }
 
-function Section({ title, children }: SectionProps) {
+function Section({ id, title, description, children }: SectionProps) {
   return (
-    <section style={{ marginBottom: "var(--space-32)" }}>
-      <h2
-        style={{
-          fontSize: "13px",
-          lineHeight: "18px",
-          letterSpacing: "0.6px",
-          fontWeight: 500,
-          textTransform: "uppercase",
-          color: "var(--color-text-secondary)",
-          marginBottom: "var(--space-12)",
-          paddingLeft: "var(--space-16)",
-        }}
-      >
-        {title}
-      </h2>
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-6">
+      <div className="mb-3">
+        <h2 id={`${id}-title`} className="font-display text-xl font-semibold tracking-[-0.01em]">
+          {title}
+        </h2>
+        {description && <p className="mt-0.5 text-sm text-ink-2">{description}</p>}
+      </div>
       {children}
     </section>
   );
@@ -52,47 +39,44 @@ function Section({ title, children }: SectionProps) {
 export default function SettingsPage() {
   const { isInstallable } = useInstallPromptContext();
 
+  const sections: (SectionProps & { show?: boolean })[] = [
+    { id: "business", title: "Business", description: "Salon name and contact details.", children: <BusinessSection /> },
+    { id: "hours", title: "Opening hours", description: "Clients can only book inside these hours.", children: <HoursSection /> },
+    { id: "services", title: "Services", description: "What clients can book, grouped by category.", children: <ServicesSection /> },
+    { id: "notifications", title: "Notifications", description: "Alerts on this device when bookings come in.", children: <NotificationSection /> },
+    { id: "appearance", title: "Appearance", description: "Light, dark, or follow this device.", children: <AppearanceSection /> },
+    { id: "install", title: "Install the app", children: <AppInstallSection />, show: isInstallable },
+    { id: "reminders", title: "Reminders", description: "WhatsApp reminders sent before each visit.", children: <RemindersSection /> },
+    { id: "whatsapp", title: "WhatsApp", children: <WhatsAppSection /> },
+    { id: "mpesa", title: "M-Pesa", children: <MPesaSection /> },
+    { id: "account", title: "Account", children: <AccountSection /> },
+  ];
+  const visible = sections.filter((s) => s.show !== false);
+
   return (
-    <div>
-      <PageHeader title="Settings" showBack={false} />
+    <div className="flex flex-col pb-10">
+      <PageHeader title="Settings" subtitle="How the salon shows up to clients on WhatsApp and the website." />
 
-      <div style={{ padding: "var(--space-16)" }}>
-        <Section title="Business">
-          <BusinessSection />
-        </Section>
+      <div className="flex items-start gap-10 px-5 pt-4 md:px-8 lg:px-12">
+        <nav aria-label="Settings sections" className="sticky top-6 hidden w-50 shrink-0 flex-col gap-0.5 lg:flex">
+          {visible.map((s) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className="flex h-10 items-center rounded-[10px] px-3 text-[0.9375rem] font-medium text-ink-2 hover:bg-petal hover:text-plum-deep"
+            >
+              {s.title}
+            </a>
+          ))}
+        </nav>
 
-        <Section title="Hours">
-          <HoursSection />
-        </Section>
-
-        <Section title="Services">
-          <ServicesSection />
-        </Section>
-
-        <Section title="Notifications">
-          <NotificationSection />
-        </Section>
-        {isInstallable && (
-          <Section title="Installation">
-            <AppInstallSection />
-          </Section>
-        )}
-
-        <Section title="Reminders">
-          <RemindersSection />
-        </Section>
-
-        <Section title="WhatsApp">
-          <WhatsAppSection />
-        </Section>
-
-        <Section title="M-Pesa">
-          <MPesaSection />
-        </Section>
-
-        <Section title="Account">
-          <AccountSection />
-        </Section>
+        <div className="flex min-w-0 max-w-3xl flex-1 flex-col gap-10">
+          {visible.map(({ id, title, description, children }) => (
+            <Section key={id} id={id} title={title} description={description}>
+              {children}
+            </Section>
+          ))}
+        </div>
       </div>
     </div>
   );

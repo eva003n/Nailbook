@@ -59,7 +59,7 @@ export default function Pagination({
           <select
             value={limit}
             onChange={(e) => onLimitChange(Number(e.target.value))}
-            className="rounded-[--radius-md] border border-border bg-surface-raised px-2 py-1.5 text-text-primary focus:border-primary focus:outline-none"
+            className="rounded-(--radius-md) border border-border bg-surface-raised px-2 py-1.5 text-text-primary focus:border-primary focus:outline-none"
           >
             {PAGE_SIZES.map((s) => (
               <option key={s} value={s}>

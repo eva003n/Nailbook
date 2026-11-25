@@ -37,7 +37,7 @@ export default function Skeleton({
   return (
     <div
       aria-hidden="true"
-      className={clsx("bg-surface-raised animate-pulse", className)}
+      className={clsx("bg-petal animate-pulse", className)}
       style={{
         width: width ?? shapeStyle.width,
         height: height ?? shapeStyle.height,
@@ -49,16 +49,15 @@ export default function Skeleton({
 
 export function StatCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-[--radius-md] bg-surface p-4 shadow-[--shadow-card]">
-      <Skeleton className="h-9 w-9 rounded-full" />
-      <Skeleton className="h-7 w-20" />
+    <div className="flex flex-col gap-2 rounded-(--radius-lg) border border-line bg-surface p-4">
+      <Skeleton className="h-8 w-20" />
       <Skeleton className="h-4 w-24" />
     </div>
   );
 }
 export function BookingCardSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-[--radius-md] bg-surface p-4 shadow-[--shadow-card]">
+    <div className="flex items-center gap-3.5 rounded-(--radius-lg) bg-surface p-3">
       <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-32" />

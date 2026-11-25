@@ -73,7 +73,7 @@ export default function BottomSheet({ open, onClose, title, children }: BottomSh
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-ink/50"
         onClick={onClose}
         aria-hidden="true"
         style={{
@@ -84,10 +84,10 @@ export default function BottomSheet({ open, onClose, title, children }: BottomSh
       {/* Sheet content */}
       <div
         ref={sheetRef}
-        className="absolute bottom-0 left-0 right-0 overflow-auto"
+        className="absolute bottom-0 left-0 right-0 overflow-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-full md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-(--radius-xl)!"
         style={{
           background: "var(--color-surface)",
-          borderRadius: "var(--radius-lg) var(--radius-lg) 0 0",
+          borderRadius: "var(--radius-xl) var(--radius-xl) 0 0",
           boxShadow: "var(--shadow-modal)",
           maxHeight: "85vh",
           /* §2.6: Modal open animation — translateY(100%) → translateY(0) with --ease-out */
@@ -95,36 +95,28 @@ export default function BottomSheet({ open, onClose, title, children }: BottomSh
         }}
       >
         {/* Handle indicator */}
-        <div className="flex justify-center pt-3 pb-1">
+        <div className="flex justify-center pt-3 pb-2 md:hidden">
           <div
             style={{
               width: 40,
-              height: 4,
-              borderRadius: 2,
-              background: "var(--color-text-tertiary)",
+              height: 5,
+              borderRadius: 999,
+              background: "var(--color-line)",
             }}
           />
         </div>
 
         {/* Header */}
         {title && (
-          <div className="px-[var(--space-16)] pb-[var(--space-8)]">
-            <h2
-              style={{
-                fontSize: "17px",
-                lineHeight: "22px",
-                letterSpacing: "-0.1px",
-                fontWeight: 600,
-                color: "var(--color-text-primary)",
-              }}
-            >
+          <div className="px-5 pb-3 md:px-7 md:pt-6">
+            <h2 className="font-display text-[1.375rem] leading-7 font-semibold tracking-[-0.01em] text-ink">
               {title}
             </h2>
           </div>
         )}
 
         {/* Body */}
-        <div className="px-[var(--space-16)] pb-[calc(var(--space-16)+env(safe-area-inset-bottom))]">
+        <div className="px-5 pb-[calc(var(--space-24)+env(safe-area-inset-bottom))] md:px-7 md:pb-7">
           {children}
         </div>
       </div>

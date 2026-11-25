@@ -1,11 +1,9 @@
 /**
- * NotificationBell — top-right bell icon with unread count badge.
- * Taps navigate to /notifications.
+ * NotificationBell — 44px square button with unread count. Opens /notifications.
  */
 import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUnreadCount } from "@/pages/notifications/hooks/useNotifications";
-
 
 export default function NotificationBell() {
   const navigate = useNavigate();
@@ -14,15 +12,14 @@ export default function NotificationBell() {
 
   return (
     <button
-      onClick={() => navigate("/notifications")}
-      className="relative flex min-h-11 min-w-11 items-center justify-center"
+      onClick={() => navigate("/admin/notifications")}
+      className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-(--radius-md) border border-line bg-surface text-ink-2 transition-colors hover:bg-petal hover:text-plum-deep"
       aria-label={`Notifications${unread > 0 ? `, ${unread} unread` : ""}`}
     >
-      <Bell size={22} strokeWidth={2} className="text-text-primary" />
+      <Bell size={20} strokeWidth={2} aria-hidden="true" />
       {unread > 0 && (
         <span
-          className="absolute right-0.5 top-0.5 flex min-w-4.5 items-center justify-center rounded-full bg-error px-1 text-2xs font-bold leading-none text-white"
-          style={{ height: 18 }}
+          className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-paper bg-plum px-1 text-[0.6875rem] font-bold text-white"
           aria-hidden="true"
         >
           {unread > 99 ? "99+" : unread}

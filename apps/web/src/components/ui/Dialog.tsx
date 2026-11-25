@@ -62,21 +62,21 @@ export default function Dialog({
     <dialog
       ref={dialogRef}
       onKeyDown={handleKeyDown}
-      className="m-auto w-[90vw] max-w-sm rounded-[--radius-lg] border-none p-0 shadow-[--shadow-modal] backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="m-auto w-[calc(100vw-40px)] max-w-sm rounded-(--radius-xl) border-none bg-surface p-0 text-ink shadow-(--shadow-modal) backdrop:bg-ink/50 backdrop:backdrop-blur-[2px]"
       aria-labelledby="dialog-title"
       aria-describedby={description ? "dialog-description" : undefined}
     >
-      <div className="p-5">
-        <h2 id="dialog-title" className="text-lg font-semibold text-text-primary">
+      <div className="p-6">
+        <h2 id="dialog-title" className="font-display text-[1.375rem] leading-7 font-semibold tracking-[-0.01em]">
           {title}
         </h2>
         {description && (
-          <p id="dialog-description" className="mt-2 text-sm text-text-secondary">
+          <p id="dialog-description" className="mt-2.5 text-[0.9375rem] leading-5.5 text-ink-2">
             {description}
           </p>
         )}
         {children}
-        <div className="mt-5 flex gap-3">
+        <div className="mt-6 flex gap-2.5">
           <Button variant="secondary" fullWidth onClick={onCancel} disabled={isConfirming}>
             {cancelLabel}
           </Button>

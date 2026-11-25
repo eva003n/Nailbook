@@ -1,88 +1,22 @@
-/* import { useParams } from "react-router-dom";
+/**
+ * Transaction detail — amount, status, M-Pesa receipt, customer and booking.
+ */
+import { useNavigate, useParams } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
 import { usePayment } from "@/pages/payments/hooks/usePayments";
-import Badge, { paymentStatusToBadge } from "@/components/ui/Badge";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 import ErrorState from "@/components/ui/ErrorState";
-
-export default function PaymentDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  if (!id) throw new Error("Missing payment ID");
-
-  const { data: payment, isLoading, error, refetch } = usePayment(id);
-
-  if (isLoading) return <div className="px-6 py-8 text-center text-text-secondary">Loading...</div>;
-  if (error) return <ErrorState message="Failed to load payment details." onRetry={refetch} />;
-  if (!payment) return <div className="px-6 py-8 text-center text-text-secondary">Payment not found</div>;
-
-  const badge = paymentStatusToBadge(payment.status);
-
-  return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
-      <h1 className="text-2xl font-bold text-text-primary">Payment — {payment.booking.reference}</h1>
-
-      <div className="rounded-[--radius-md] bg-surface p-6 shadow-[--shadow-card]">
-        <h2 className="mb-4 text-lg font-semibold text-text-primary">Payment Details</h2>
-        <dl className="space-y-3">
-          <div className="flex justify-between">
-            <dt className="text-sm text-text-secondary">Amount</dt>
-            <dd className="text-sm font-medium text-text-primary">KES {payment.amountKes.toLocaleString()}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-sm text-text-secondary">Status</dt>
-            <dd>
-              <Badge variant={badge.variant}>{badge.label}</Badge>
-            </dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-sm text-text-secondary">M-Pesa Receipt</dt>
-            <dd className="text-sm font-medium text-text-primary">{payment.mpesaReceiptNumber ?? "—"}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-sm text-text-secondary">Customer</dt>
-            <dd className="text-sm font-medium text-text-primary">{payment.customer.name}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-sm text-text-secondary">Service</dt>
-            <dd className="text-sm font-medium text-text-primary">{payment.booking.service.name}</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-  );
-} */
-
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Phone,
-  CalendarDays,
-  Receipt,
-  Banknote,
-} from "lucide-react";
-import { usePayment } from "@/pages/payments/hooks/usePayments";
-import Badge, { paymentStatusToBadge } from "@/components/ui/Badge";
-import ErrorState from "@/components/ui/ErrorState";
+import Skeleton from "@/components/ui/Skeleton";
 import Avatar from "@/components/ui/Avatar";
-import { formatKes, formatDate, formatTime } from "@/lib/format";
+import { formatDate, formatPhone, formatPhoneForWhatsApp, formatTime } from "@/lib/format";
 
-function Skeleton() {
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 space-y-4 animate-pulse">
-      <div className="h-6 w-48 rounded bg-surface-raised" />
-      <div className="rounded-[--radius-lg] bg-surface p-6 space-y-4 shadow-[--shadow-card]">
-        <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-full bg-surface-raised" />
-          <div className="space-y-2">
-            <div className="h-4 w-32 rounded bg-surface-raised" />
-            <div className="h-3 w-24 rounded bg-surface-raised" />
-          </div>
-        </div>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex justify-between">
-            <div className="h-3 w-24 rounded bg-surface-raised" />
-            <div className="h-3 w-20 rounded bg-surface-raised" />
-          </div>
-        ))}
-      </div>
+    <div className="flex items-center justify-between gap-4 border-t border-line px-4.5 py-3.5 first:border-t-0">
+      <dt className="text-[0.9375rem] text-ink-2">{label}</dt>
+      <dd className="text-right text-[0.9375rem] font-semibold text-ink">{children}</dd>
     </div>
   );
 }
@@ -90,139 +24,92 @@ function Skeleton() {
 export default function PaymentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   if (!id) throw new Error("Missing payment ID");
 
   const { data: payment, isLoading, error, refetch } = usePayment(id);
+  const header = <PageHeader title="Payment" showBack backTo="/payments" bell={false} />;
 
-  if (isLoading) return <Skeleton />;
-  if (error)
+  if (isLoading) {
     return (
-      <ErrorState message="Failed to load payment details." onRetry={refetch} />
-    );
-  if (!payment)
-    return (
-      <div className="px-6 py-8 text-center text-text-secondary">
-        Payment not found
+      <div>
+        {header}
+        <div className="mx-auto max-w-2xl space-y-4 px-5 py-4">
+          <Skeleton shape="rect" height="120px" />
+          <Skeleton shape="rect" height="240px" />
+        </div>
       </div>
     );
+  }
+  if (error) {
+    return (
+      <div>
+        {header}
+        <ErrorState heading="Couldn't load this payment" message="Check your connection and try again." onRetry={refetch} />
+      </div>
+    );
+  }
+  if (!payment) {
+    return (
+      <div>
+        {header}
+        <ErrorState heading="Payment not found" message="It may have been removed." />
+      </div>
+    );
+  }
 
-  const badge = paymentStatusToBadge(payment.status);
+  const service = payment.booking.services?.[0]?.service?.name ?? payment.booking.service?.name ?? "Nail service";
+  const phone = payment.phoneNumber || payment.customer.phone;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-text-secondary hover:bg-surface-raised"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <h1 className="text-lg font-bold text-text-primary leading-tight">
-            {payment.booking.reference}
-          </h1>
-          <p className="text-sm text-text-secondary">Payment details</p>
-        </div>
-      </div>
-
-      {/* Amount hero */}
-      <div className="rounded-[--radius-lg] bg-primary-light p-5 flex items-center justify-between">
-        <div>
-          <p className="text-sm text-primary-dark/70">Amount</p>
-          <p className="text-3xl font-bold text-primary-dark">
-            {formatKes(payment.amountKes)}
-          </p>
-        </div>
-        <Badge variant={badge.variant}>{badge.label}</Badge>
-      </div>
-
-      {/* Customer card */}
-      <div className="rounded-[--radius-lg] bg-surface shadow-[--shadow-card] p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-disabled mb-3">
-          Customer
-        </p>
-        <div className="flex items-center gap-3">
-          <Avatar name={payment.customer.name} />
-          <div className="min-w-0">
-            <p className="font-semibold text-text-primary">
-              {payment.customer.name}
+    <div className="pb-6">
+      {header}
+      <div className="mx-auto flex max-w-2xl flex-col gap-5 px-5 pt-2 md:px-8">
+        <section className="flex flex-wrap items-end justify-between gap-4 rounded-(--radius-panel) border border-line bg-surface p-6">
+          <div>
+            <p className="text-sm text-ink-2">Amount</p>
+            <p className="font-display text-[2.5rem] leading-11 font-bold tracking-[-0.02em] tabular-nums">
+              <small className="mr-1.5 text-lg font-semibold tracking-normal text-ink-2">KES</small>
+              {payment.amountKes.toLocaleString("en-KE")}
             </p>
-            <a
-              href={`https://wa.me/${payment.phoneNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-primary"
-            >
-              <Phone className="h-3.5 w-3.5" />
-              {payment.customer.phone}
-            </a>
+            <p className="mt-1 text-sm text-ink-2">
+              {formatDate(payment.createdAt)} at {formatTime(payment.createdAt)}
+            </p>
           </div>
-        </div>
-      </div>
+          <Badge kind="payment" status={payment.status} />
+        </section>
 
-      {/* Booking card */}
-      <div className="rounded-[--radius-lg] bg-surface shadow-[--shadow-card] p-4 space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-disabled">
-          Booking
-        </p>
-        <Row
-          icon={CalendarDays}
-          label="Service"
-          value={payment.booking.services?.[0]?.service?.name ?? payment.booking.service?.name ?? "Nail Service"}
-        />
-        <Row
-          icon={Receipt}
-          label="Reference"
-          value={payment.booking.reference}
-        />
-        <Row
-          icon={CalendarDays}
-          label="Date"
-          value={`${formatDate(payment.createdAt)} at ${formatTime(payment.createdAt)}`}
-        />
-      </div>
+        <dl className="rounded-(--radius-lg) border border-line bg-surface">
+          <Row label="M-Pesa receipt">
+            <span className="tracking-[0.02em]">{payment.mpesaReceiptNumber ?? (payment.method === "CASH" ? "Paid in cash" : "Not issued yet")}</span>
+          </Row>
+          <Row label="Paid from">{formatPhone(phone)}</Row>
+          <Row label="Method">{payment.method === "CASH" ? "Cash" : "M-Pesa"}</Row>
+          <Row label="Service">{service}</Row>
+          <Row label="Booking">{payment.booking.reference}</Row>
+        </dl>
 
-      {/* M-Pesa card */}
-      <div className="rounded-[--radius-lg] bg-surface shadow-[--shadow-card] p-4 space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-disabled">
-          M-Pesa
-        </p>
-        <Row
-          icon={Banknote}
-          label="Receipt no."
-          value={payment.mpesaReceiptNumber ?? "—"}
-          mono={!!payment.mpesaReceiptNumber}
-        />
-      </div>
-    </div>
-  );
-}
+        <section className="flex flex-wrap items-center gap-4 rounded-(--radius-lg) border border-line bg-surface p-4.5">
+          <Avatar name={payment.customer.name} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-semibold">{payment.customer.name}</p>
+            <p className="text-sm text-ink-2">{formatPhone(payment.customer.phone)}</p>
+          </div>
+          <a
+            href={`https://wa.me/${formatPhoneForWhatsApp(phone)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center gap-2 rounded-(--radius-md) bg-whatsapp-bg px-4 text-[0.9375rem] font-semibold text-whatsapp"
+            aria-label={`Open WhatsApp chat with ${payment.customer.name}`}
+          >
+            <MessageCircle size={18} aria-hidden="true" />
+            WhatsApp
+          </a>
+        </section>
 
-function Row({
-  icon: Icon,
-  label,
-  value,
-  mono = false,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2 text-sm text-text-secondary">
-        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-        {label}
+        <Button variant="secondary" size="lg" onClick={() => navigate(`/admin/bookings/${payment.bookingId}`)}>
+          View booking
+        </Button>
       </div>
-      <span
-        className={`text-sm font-medium text-text-primary text-right ${mono ? "font-mono" : ""}`}
-      >
-        {value}
-      </span>
     </div>
   );
 }
